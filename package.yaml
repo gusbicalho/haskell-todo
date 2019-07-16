@@ -1,0 +1,61 @@
+name:                servant-test
+version:             0.1.0.0
+github:              "gusbicalho/servant-test"
+license:             BSD3
+author:              "Gustavo Bicalho"
+maintainer:          "gusbicalho@gmail.com"
+copyright:           "2019 Gustavo Bicalho"
+
+extra-source-files:
+- README.md
+
+# To avoid duplicated efforts in documentation and dealing with the
+# complications of embedding Haddock markup inside cabal files, it is
+# common to point users to the README.md file.
+description:         Please see the README on GitHub at <https://github.com/gusbicalho/servant-test#readme>
+
+ghc-options:
+- -O2
+- -Wall
+
+library:
+  source-dirs: src
+  exposed-modules:
+  - Lib
+  dependencies:
+  - base >= 4.7 && < 5
+  - aeson
+  - servant
+  - servant-server
+  - text
+  - time
+  - wai
+  - warp
+
+executables:
+  servant-test-exe:
+    main:                Main.hs
+    source-dirs:         app
+    ghc-options:
+    - -threaded
+    - -rtsopts=some
+    - -with-rtsopts=-N
+    dependencies:
+    - base
+    - servant-test
+
+tests:
+  servant-test-test:
+    main:                Spec.hs
+    source-dirs:         test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - base
+    - servant-test
+    - hspec
+    - hspec-wai
+    - hspec-wai-json
+    - aeson

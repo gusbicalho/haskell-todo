@@ -1,4 +1,5 @@
 .stack-work/
+servant-test.cabal
 *~
 *.hi
 *.o
