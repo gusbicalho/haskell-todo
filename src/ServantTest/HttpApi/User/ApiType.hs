@@ -10,10 +10,11 @@ module ServantTest.HttpApi.User.ApiType where
 import Servant.API
 import Data.Aeson.TH
 
-type UserAPI =  ListUsersAPI :<|> GetUserAPI
+type UserAPI = ListUsersAPI
+          :<|> GetUserAPI
 
-type ListUsersAPI = "users" :> QueryParam "sortBy" SortBy :> Get '[JSON] [User]
-type GetUserAPI = "user" :> Capture "userid" Integer :> Get '[JSON] User
+type ListUsersAPI = QueryParam "sortBy" SortBy :> Get '[JSON] [User]
+type GetUserAPI = Capture "userid" Integer :> Get '[JSON] User
 
 data SortBy = Age | Name
 instance FromHttpApiData SortBy where

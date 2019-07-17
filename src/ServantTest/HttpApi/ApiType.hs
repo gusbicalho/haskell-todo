@@ -9,4 +9,7 @@ import Servant.API
 
 import ServantTest.HttpApi.User.ApiType (UserAPI)
 
-type API = "api" :> UserAPI
+type API =
+  "api" :> (
+    "users" :> UserAPI
+  )
