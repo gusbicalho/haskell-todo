@@ -1,6 +1,6 @@
 module Main where
 
-import Lib
+import ServantTest.Lib
 
 main :: IO ()
 main = startApp

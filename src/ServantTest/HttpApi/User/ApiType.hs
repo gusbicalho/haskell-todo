@@ -5,7 +5,7 @@
   , TypeOperators
   #-}
 
-module ApiType.User where
+module ServantTest.HttpApi.User.ApiType where
 
 import Servant.API
 import Data.Aeson.TH

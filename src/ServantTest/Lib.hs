@@ -1,4 +1,4 @@
-module Lib
+module ServantTest.Lib
     ( startApp
     , app
     ) where
@@ -7,8 +7,8 @@ import Network.Wai
 import Network.Wai.Handler.Warp
 import Servant
 
-import ApiType
-import Server
+import ServantTest.HttpApi.ApiType (API)
+import ServantTest.HttpApi.Server (server)
 
 startApp :: IO ()
 startApp = do
