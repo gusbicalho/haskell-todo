@@ -8,15 +8,13 @@ module ServantTest.HttpApi.UserSpec (spec) where
 import Test.Hspec
 import Test.Hspec.Wai
 
-import Data.Proxy
 import Network.Wai
 import Servant
 
-import ServantTest.HttpApi.User.ApiType (UserAPI)
-import ServantTest.HttpApi.User.Server (server)
+import ServantTest.HttpApi.User.Server (api, server)
 
 app :: Application
-app = serve (Proxy @UserAPI) server
+app = serve api server
 
 spec :: Spec
 spec = with (return app) $ do
