@@ -20,8 +20,6 @@ ghc-options:
 
 library:
   source-dirs: src
-  exposed-modules:
-  - ServantTest.Lib
   dependencies:
   - base >= 4.7 && < 5
   - aeson
@@ -59,4 +57,6 @@ tests:
     - hspec
     - hspec-wai
     - hspec-wai-json
+    - wai
+    - servant-server
     - aeson

@@ -12,6 +12,7 @@ module Version.Server
   , API
   , ServerConstraints
   , HasVersion(..)
+  , provideVersion
   ) where
 
 import Control.Monad.Reader
@@ -32,3 +33,6 @@ type ServerConstraints m a = (HasVersion a, MonadReader a m)
 
 server :: ServerConstraints m a => ServerT API m
 server = Version . getVersion <$> ask
+
+provideVersion :: String -> ReaderT String m a -> m a
+provideVersion v m = runReaderT m v
