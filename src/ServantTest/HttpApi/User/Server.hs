@@ -10,7 +10,7 @@ module ServantTest.HttpApi.User.Server
   , ServerConstraints
   ) where
 
-import Control.Monad.Error
+import Control.Monad.Except
 import Servant
 import Data.List (sortOn)
 import qualified ServantTest.HttpApi.User.ApiType as AT
