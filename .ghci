@@ -1,2 +1,3 @@
 :set prompt "\ESC[1;34m%s\n\ESC[0;34m\STXλ> \ESC[m\STX"
+:set prompt-cont "\ESC[0;34m\STX | \ESC[m\STX"
 :set +m
