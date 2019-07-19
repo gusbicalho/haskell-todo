@@ -32,7 +32,7 @@ api = Proxy
 type ServerConstraints m a = (HasVersion a, MonadReader a m)
 
 server :: ServerConstraints m a => ServerT API m
-server = Version . getVersion <$> ask
+server = asks $ Version . getVersion
 
 provideVersion :: String -> ReaderT String m a -> m a
 provideVersion v m = runReaderT m v
