@@ -1,7 +1,7 @@
 {-# LANGUAGE
     FlexibleContexts
   #-}
-module ServantTest.Lib
+module ServantTest
     ( startApp
     , app
     ) where
