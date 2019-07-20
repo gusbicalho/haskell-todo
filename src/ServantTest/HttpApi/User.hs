@@ -3,7 +3,7 @@
   , FlexibleContexts
   , OverloadedStrings
   #-}
-module ServantTest.HttpApi.User.Server
+module ServantTest.HttpApi.User
   ( api
   , server
   , AT.API

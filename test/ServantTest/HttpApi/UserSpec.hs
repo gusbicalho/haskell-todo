@@ -11,7 +11,7 @@ import Test.Hspec.Wai
 import Network.Wai
 import Servant
 
-import ServantTest.HttpApi.User.Server (api, server)
+import ServantTest.HttpApi.User (api, server)
 
 app :: Application
 app = serve api server

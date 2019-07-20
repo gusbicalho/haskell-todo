@@ -3,7 +3,7 @@
   , FlexibleInstances
   #-}
 
-module Version.Class
+module Common.Version.Class
   ( HasVersion(..)
   ) where
 

@@ -23,8 +23,8 @@ library:
   dependencies:
   - base >= 4.7 && < 5
   - aeson
+  - aeson-extra
   - mtl
-  - servant
   - servant-server
   - text
   - time

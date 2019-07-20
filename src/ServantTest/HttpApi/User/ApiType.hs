@@ -7,7 +7,7 @@
 
 module ServantTest.HttpApi.User.ApiType where
 
-import Servant.API
+import Servant
 import Data.Aeson.TH
 
 type API = ListUsersAPI

@@ -1,8 +1,9 @@
 {-# LANGUAGE
     OverloadedStrings
+  , TypeApplications
   #-}
 {- HLINT ignore "Redundant do" -}
-module VersionSpec (spec) where
+module Common.VersionSpec (spec) where
 
 import Test.Hspec
 import Test.Hspec.Wai
@@ -10,10 +11,10 @@ import Test.Hspec.Wai
 import Network.Wai
 import Servant
 
-import Version.Server
+import Common.Version.Server
 
 app :: Application
-app = serve api $ hoistServer api (provideVersion "1.2.3.4") server
+app = serve api $ hoistServer api (provideVersion @String "1.2.3.4") server
 
 spec :: Spec
 spec = with (return app) $ do
