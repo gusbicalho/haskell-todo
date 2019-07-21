@@ -3,7 +3,7 @@
   , TypeApplications
   #-}
 {- HLINT ignore "Redundant do" -}
-module Common.VersionSpec (spec) where
+module Common.Version.ServerSpec (spec) where
 
 import Test.Hspec
 import Test.Hspec.Wai
