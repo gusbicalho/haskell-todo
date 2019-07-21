@@ -11,11 +11,12 @@ import Data.Aeson.Types
 import Data.Aeson.Extra.Merge (lodashMerge)
 import GHC.Exts
 import Data.Either
+import qualified Data.Text as T
 import System.Environment (lookupEnv)
 
-type ConfigLoader = IO (Either String Value)
+type ConfigLoader = IO (Either T.Text Value)
 
-waterfall :: [Either String Value] -> (Value, [String])
+waterfall :: [Either T.Text Value] -> (Value, [T.Text])
 waterfall vs = (mergeAll (rights vs) (object []), lefts vs)
   where
     mergeAll []     acc = acc
@@ -25,7 +26,7 @@ loadConfigFrom :: FromJSON a => [ConfigLoader] -> IO (Maybe a)
 loadConfigFrom configLoaders = do
     configs <- sequence configLoaders
     let (result, errors) = waterfall configs
-    mapM_ printLoadError errors
+    mapM_ (printLoadError . T.unpack) errors
     case parseEither parseJSON result of
       Left  err    -> return Nothing <* printLoadError err
       Right config -> return . Just $ config
@@ -39,9 +40,11 @@ loadConfig :: FromJSON a => IO a
 loadConfig = loadConfigFrom defaultLoaders >>= orThrow
   where orThrow = maybe (ioError $ userError "[Load Config] Load failed.") return
 
-loadFromEnv :: String -> ConfigLoader
+loadFromEnv :: T.Text -> ConfigLoader
 loadFromEnv varName = do
-  env <- lookupEnv varName
-  case env of
-    Nothing -> return . Left $ "Env var " ++ varName ++ " not found."
-    Just envJson -> return . eitherDecode . fromString $ envJson
+    env <- lookupEnv $ T.unpack varName
+    case env of
+      Nothing -> return . Left $ T.concat ["Env var ", varName, " not found."]
+      Just envJson -> return . leftToText . eitherDecode . fromString $ envJson
+  where leftToText (Right v)  = Right v
+        leftToText (Left str) = Left $ T.pack str

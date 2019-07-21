@@ -4,6 +4,7 @@ module ServantTest.WireTypes.User where
 
 import Servant
 import Data.Aeson.TH
+import qualified Data.Text as T
 
 data SortBy = Age | Name
 instance FromHttpApiData SortBy where
@@ -15,9 +16,9 @@ instance FromHttpApiData SortBy where
     _ -> fail "Invalid SortBy param"
 
 data User = User { id :: Integer
-                 , name :: String
+                 , name :: T.Text
                  , age :: Int
-                 , email :: String
+                 , email :: T.Text
                  } deriving (Eq, Show)
 $(deriveJSON defaultOptions ''User)
 

@@ -1,8 +1,10 @@
 module ServantTest.Models.User where
 
+import qualified Data.Text as T
+
 data User = User {
   id :: Integer
-, name :: String
+, name :: T.Text
 , age :: Int
-, email :: String
+, email :: T.Text
 } deriving (Eq, Show)

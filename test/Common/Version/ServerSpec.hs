@@ -7,12 +7,13 @@ import Test.Hspec.Wai
 import Network.Wai
 import Servant
 import Control.Monad.Reader
+import qualified Data.Text as T
 
 import Common.Version.Server
 
 app :: Application
 app = serve api $ hoistServer api provideVersion server
-  where provideVersion :: ReaderT String m a -> m a
+  where provideVersion :: ReaderT T.Text m a -> m a
         provideVersion m = runReaderT m "1.2.3.4"
 
 spec :: Spec

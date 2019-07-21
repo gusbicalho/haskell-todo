@@ -8,11 +8,12 @@ import Test.Hspec.Wai
 
 import Data.Aeson.TH
 import Servant
+import qualified Data.Text as T
 
 import Common.Config.Server
 
 data Config = Config { foo :: Int
-                     , bar :: String
+                     , bar :: T.Text
                      }
   deriving (Eq, Show)
 

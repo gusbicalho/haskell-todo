@@ -12,9 +12,10 @@ import Control.Monad.Reader
 import Data.Proxy
 import Servant
 import Data.Aeson.TH
+import qualified Data.Text as T
 import Common.Version.Class ( HasVersion(..) )
 
-newtype Version = Version { version :: String } deriving (Eq, Show)
+newtype Version = Version { version :: T.Text } deriving (Eq, Show)
 $(deriveJSON defaultOptions ''Version)
 
 type API = Get '[JSON] Version

@@ -7,13 +7,14 @@ import Data.Proxy
 import Network.Wai.Handler.Warp (Port)
 import Servant
 import Control.Monad.Reader
+import qualified Data.Text as T
 
 import qualified Common.Config.Server as CS
 import qualified Common.Config.Loader as CL
 import Common.Version.Class (HasVersion(..))
 
 data Config = Config { port :: Port
-                     , version :: String
+                     , version :: T.Text
                      }
   deriving (Eq, Show)
 

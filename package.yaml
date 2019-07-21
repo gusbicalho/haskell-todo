@@ -102,3 +102,4 @@ tests:
     - servant-server
     - aeson
     - mtl
+    - text
