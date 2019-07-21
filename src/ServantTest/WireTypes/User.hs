@@ -1,20 +1,10 @@
-{-# LANGUAGE
-    DataKinds
-  , OverloadedStrings
-  , TemplateHaskell
-  , TypeOperators
-  #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TemplateHaskell #-}
 
-module ServantTest.HttpApi.User.ApiType where
+module ServantTest.WireTypes.User where
 
 import Servant
 import Data.Aeson.TH
-
-type API = ListUsersAPI
-      :<|> GetUserAPI
-
-type ListUsersAPI = QueryParam "sortBy" SortBy :> Get '[JSON] [User]
-type GetUserAPI = Capture "userid" Integer :> Get '[JSON] User
 
 data SortBy = Age | Name
 instance FromHttpApiData SortBy where

@@ -5,7 +5,6 @@ module ServantTest
     ( startApp
     ) where
 
-import Network.Wai
 import Network.Wai.Handler.Warp
 import Control.Monad.Reader
 import Servant

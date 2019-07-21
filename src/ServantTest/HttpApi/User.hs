@@ -1,40 +1,50 @@
-{-# LANGUAGE
-    ConstraintKinds
-  , FlexibleContexts
-  , OverloadedStrings
-  #-}
+{-# LANGUAGE ConstraintKinds #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeOperators #-}
+
 module ServantTest.HttpApi.User
   ( api
   , server
-  , AT.API
+  , API
   , ServerConstraints
   ) where
 
 import Control.Monad.Except
 import Servant
 import Data.List (sortOn)
-import qualified ServantTest.HttpApi.User.ApiType as AT
+import qualified ServantTest.WireTypes.User as U
 
-api :: Proxy AT.API
+type API = ListUsersAPI
+      :<|> GetUserAPI
+
+type ListUsersAPI = QueryParam "sortBy" U.SortBy :> Get '[JSON] [U.User]
+type GetUserAPI = Capture "userid" Integer :> Get '[JSON] U.User
+
+api :: Proxy API
 api = Proxy
 
 type ServerConstraints m = MonadError ServantErr m
 
-server :: ServerConstraints m => ServerT AT.API m
+server :: ServerConstraints m => ServerT API m
 server = listUsers
     :<|> getUser
 
-listUsers :: ServerConstraints m => ServerT AT.ListUsersAPI m
-listUsers Nothing       = return users
-listUsers (Just AT.Age)  = return $ sortOn AT.age users
-listUsers (Just AT.Name) = return $ sortOn AT.name users
+-- Handlers
 
-getUser :: ServerConstraints m => ServerT AT.GetUserAPI m
-getUser idParam = result $ filter ((idParam ==) . AT.id) $ users
+listUsers :: ServerConstraints m => ServerT ListUsersAPI m
+listUsers Nothing       = return users
+listUsers (Just U.Age)  = return $ sortOn U.age users
+listUsers (Just U.Name) = return $ sortOn U.name users
+
+getUser :: ServerConstraints m => ServerT GetUserAPI m
+getUser idParam = result $ filter ((idParam ==) . U.id) $ users
   where result [] = throwError err404
         result (x:_) = return x
 
-users :: [AT.User]
-users = [ AT.User 1 "Isaac Newton" 26 "isaac@newton.com"
-        , AT.User 2 "Albert Einstein" 42 "albert@einstein.com"
+users :: [U.User]
+users = [ U.User 1 "Isaac Newton" 26 "isaac@newton.com"
+        , U.User 2 "Albert Einstein" 42 "albert@einstein.com"
         ]
