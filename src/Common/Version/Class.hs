@@ -1,6 +1,5 @@
 {-# LANGUAGE
-    TypeSynonymInstances
-  , FlexibleInstances
+    FlexibleInstances
   #-}
 
 module Common.Version.Class

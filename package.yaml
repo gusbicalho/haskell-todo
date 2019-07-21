@@ -60,3 +60,4 @@ tests:
     - wai
     - servant-server
     - aeson
+    - mtl

@@ -18,23 +18,51 @@ module ServantTest.HttpApi
 import Data.Proxy
 import Servant
 
+import qualified Common.Config.Server as Config
 import qualified Common.Version.Server as Version
 import qualified ServantTest.HttpApi.User as User
 
-type API =
+type OpsAPI =
+  "ops" :> (
+    "version" :> Version.API
+    :<|>
+    "config" :> Config.API
+  )
+
+type OpsServerConstraints m a =
+  ( Version.ServerConstraints m a
+  , Config.ServerConstraints m
+  )
+
+opsServer :: forall m a. OpsServerConstraints m a => ServerT OpsAPI m
+opsServer = Version.server
+       :<|> Config.server
+
+type ApplicationAPI =
   "api" :> (
-       "version" :> Version.API
-  :<|> "users" :> User.API
+    "users" :> User.API
+  )
+
+type ApplicationServerConstraints m =
+  User.ServerConstraints m
+
+applicationServer :: forall m. ApplicationServerConstraints m => ServerT ApplicationAPI m
+applicationServer = User.server
+
+type API = OpsAPI
+      :<|> ApplicationAPI
+
+type ServerConstraints m a =
+  ( OpsServerConstraints m a
+  , ApplicationServerConstraints m
   )
 
 api :: Proxy API
 api = Proxy
 
-type ServerConstraints m a = (Version.ServerConstraints m a, User.ServerConstraints m)
-
 server :: forall m a. ServerConstraints m a => ServerT API m
-server = Version.server
-    :<|> User.server
+server = opsServer
+    :<|> applicationServer
 
 app :: forall m a . ServerConstraints m a => (forall x. m x -> Handler x) -> Application
 app provideDependencies = serve api $ hoistServer api provideDependencies server

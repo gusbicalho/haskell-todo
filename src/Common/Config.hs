@@ -1,8 +1,3 @@
-{-# LANGUAGE
-    OverloadedStrings
-  , TemplateHaskell
-  #-}
-
 module Common.Config
   ( Config (..)
   , ConfigLoader
