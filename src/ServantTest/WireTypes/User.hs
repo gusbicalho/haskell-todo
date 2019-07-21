@@ -20,5 +20,10 @@ data User = User { id :: Integer
                  , age :: Int
                  , email :: String
                  } deriving (Eq, Show)
-
 $(deriveJSON defaultOptions ''User)
+
+newtype SingleUser = SingleUser { user :: User } deriving (Eq, Show)
+$(deriveJSON defaultOptions ''SingleUser)
+
+newtype ManyUsers = ManyUsers { users :: [User] } deriving (Eq, Show)
+$(deriveJSON defaultOptions ''ManyUsers)
