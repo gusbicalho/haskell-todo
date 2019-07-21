@@ -3,7 +3,6 @@
   #-}
 module ServantTest
     ( startApp
-    , app
     ) where
 
 import Network.Wai
@@ -11,8 +10,8 @@ import Network.Wai.Handler.Warp
 import Control.Monad.Reader
 import Servant
 
-import qualified Common.Config as Config
-import ServantTest.HttpApi as HttpApi
+import qualified ServantTest.Config as Config
+import qualified ServantTest.HttpApi as HttpApi
 
 startApp :: IO ()
 startApp = do

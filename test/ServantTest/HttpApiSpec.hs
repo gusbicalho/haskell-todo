@@ -10,7 +10,7 @@ import Test.Hspec.Wai
 
 import Control.Monad.Reader
 
-import Common.Config (Config(..))
+import ServantTest.Config (Config(..))
 import ServantTest.HttpApi (app)
 
 config = Config {

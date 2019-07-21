@@ -18,7 +18,7 @@ module ServantTest.HttpApi
 import Data.Proxy
 import Servant
 
-import qualified Common.Config.Server as Config
+import qualified ServantTest.Config as Config
 import qualified Common.Version.Server as Version
 import qualified ServantTest.HttpApi.User as User
 

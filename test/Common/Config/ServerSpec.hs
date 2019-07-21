@@ -1,6 +1,5 @@
-{-# LANGUAGE
-    OverloadedStrings
-  #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TemplateHaskell #-}
 {-# OPTIONS_GHC -fno-warn-missing-signatures #-}
 {- HLINT ignore "Redundant do" -}
 module Common.Config.ServerSpec (spec) where
@@ -8,14 +7,21 @@ module Common.Config.ServerSpec (spec) where
 import Test.Hspec
 import Test.Hspec.Wai
 
+import Data.Aeson.TH
 import Servant
 
-import Common.Config.Types
 import Common.Config.Server
 
+data Config = Config { foo :: Int
+                     , bar :: String
+                     }
+  deriving (Eq, Show)
+
+$(deriveJSON defaultOptions ''Config)
+
 config = Config {
-  port = 8080
-, version = "testversion"
+  foo = 42
+, bar = "pub"
 }
 
 app :: Application
@@ -27,4 +33,4 @@ spec = with (return app) $ do
     it "responds with 200" $ do
       get "/dump" `shouldRespondWith` 200
     it "responds with version" $ do
-      get "/dump" `shouldRespondWith` "{\"port\":8080,\"version\":\"testversion\"}"
+      get "/dump" `shouldRespondWith` "{\"foo\":42,\"bar\":\"pub\"}"

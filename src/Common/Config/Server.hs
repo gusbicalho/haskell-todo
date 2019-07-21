@@ -10,6 +10,7 @@ module Common.Config.Server
   , server
   , API
   , ServerConstraints
+  , ConfigProvider
   , provideConfig
   ) where
 
@@ -17,17 +18,17 @@ import Control.Monad.Reader
 import Data.Proxy
 import Servant
 
-import Common.Config.Types
+type API c = "dump" :> Get '[JSON] c
 
-type API = "dump" :> Get '[JSON] Config
-
-api :: Proxy API
+api :: Proxy (API c)
 api = Proxy
 
-type ServerConstraints m = MonadReader Config m
+type ServerConstraints m c = MonadReader c m
 
-server :: ServerConstraints m => ServerT API m
+server :: ServerConstraints m c => ServerT (API c) m
 server = ask
 
-provideConfig :: Config -> ReaderT Config m a -> m a
-provideConfig v m = runReaderT m v
+type ConfigProvider c m a = ReaderT c m a -> m a
+
+provideConfig :: c -> ConfigProvider c m a
+provideConfig c m = runReaderT m c

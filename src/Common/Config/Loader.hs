@@ -1,8 +1,12 @@
-{-# LANGUAGE
-    OverloadedStrings
-  #-}
+{-# LANGUAGE OverloadedStrings #-}
 
-module Common.Config.Loader where
+module Common.Config.Loader
+  ( ConfigLoader
+  , loadConfigFrom
+  , defaultLoaders
+  , loadConfig
+  , loadFromEnv
+  ) where
 
 import Data.Aeson
 import Data.Aeson.Types
@@ -10,8 +14,6 @@ import Data.Aeson.Extra.Merge (lodashMerge)
 import GHC.Exts
 import Data.Either
 import System.Environment (lookupEnv)
-
-import Common.Config.Types
 
 type ConfigLoader = IO (Either String Value)
 
@@ -21,7 +23,7 @@ waterfall vs = (mergeAll (rights vs) (object []), lefts vs)
     mergeAll []     acc = acc
     mergeAll (x:xs) acc = mergeAll xs (lodashMerge acc x)
 
-loadConfigFrom :: [ConfigLoader] -> IO (Maybe Config)
+loadConfigFrom :: FromJSON a => [ConfigLoader] -> IO (Maybe a)
 loadConfigFrom configLoaders = do
     configs <- sequence configLoaders
     let (result, errors) = waterfall configs
@@ -35,7 +37,7 @@ loadConfigFrom configLoaders = do
 defaultLoaders :: [ConfigLoader]
 defaultLoaders = [loadFromEnv "SERVICE_CONFIG"]
 
-loadConfig :: IO Config
+loadConfig :: FromJSON a => IO a
 loadConfig = loadConfigFrom defaultLoaders >>= orThrow
   where orThrow = maybe (ioError $ userError "[Load Config] Load failed.") return
 
