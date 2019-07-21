@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Common.Config.Loader
   ( ConfigLoader
   , loadConfigFrom

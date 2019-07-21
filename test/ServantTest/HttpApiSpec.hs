@@ -1,6 +1,3 @@
-{-# LANGUAGE
-    OverloadedStrings
-  #-}
 {-# OPTIONS_GHC -fno-warn-missing-signatures #-}
 {- HLINT ignore "Redundant do" -}
 module ServantTest.HttpApiSpec (spec) where

@@ -1,10 +1,4 @@
-{-# LANGUAGE
-    ConstraintKinds
-  , DataKinds
-  , OverloadedStrings
-  , TemplateHaskell
-  , TypeOperators
-  #-}
+{-# LANGUAGE TemplateHaskell #-}
 
 module Common.Version.Server
   ( api
@@ -12,7 +6,6 @@ module Common.Version.Server
   , API
   , ServerConstraints
   , HasVersion(..)
-  , provideVersion
   ) where
 
 import Control.Monad.Reader
@@ -33,6 +26,3 @@ type ServerConstraints m a = (HasVersion a, MonadReader a m)
 
 server :: ServerConstraints m a => ServerT API m
 server = asks $ Version . getVersion
-
-provideVersion :: HasVersion v => v -> ReaderT v m a -> m a
-provideVersion v m = runReaderT m v

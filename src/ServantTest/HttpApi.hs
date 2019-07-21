@@ -1,13 +1,3 @@
-{-# LANGUAGE
-    AllowAmbiguousTypes
-  , ConstraintKinds
-  , DataKinds
-  , FlexibleContexts
-  , ScopedTypeVariables
-  , RankNTypes
-  , TypeOperators
-  #-}
-
 module ServantTest.HttpApi
   ( api
   , server

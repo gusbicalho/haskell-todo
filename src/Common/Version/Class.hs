@@ -1,7 +1,3 @@
-{-# LANGUAGE
-    FlexibleInstances
-  #-}
-
 module Common.Version.Class
   ( HasVersion(..)
   ) where

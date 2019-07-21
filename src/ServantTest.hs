@@ -1,6 +1,3 @@
-{-# LANGUAGE
-    FlexibleContexts
-  #-}
 module ServantTest
     ( startApp
     ) where

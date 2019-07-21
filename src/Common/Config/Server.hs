@@ -1,10 +1,3 @@
-{-# LANGUAGE
-    ConstraintKinds
-  , DataKinds
-  , FlexibleContexts
-  , TypeOperators
-  #-}
-
 module Common.Config.Server
   ( api
   , server

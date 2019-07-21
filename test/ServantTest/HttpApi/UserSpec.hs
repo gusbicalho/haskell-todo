@@ -1,7 +1,3 @@
-{-# LANGUAGE
-    OverloadedStrings
-  , TypeApplications
-  #-}
 {- HLINT ignore "Redundant do" -}
 module ServantTest.HttpApi.UserSpec (spec) where
 
