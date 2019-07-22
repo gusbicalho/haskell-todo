@@ -1,15 +1,23 @@
-module ServantTest.Sqlite where
+module ServantTest.Sqlite
+  ( initDB
+  , transact
+  , listUsers
+  , getUser
+  , createUser
+  ) where
 
 import Prelude hiding (id)
 import Database.SQLite.Simple
+import Data.Maybe (fromJust, listToMaybe)
 
 import qualified ServantTest.Models.User as M.User
+import ServantTest.Models.User (User(..), NewUser(..))
 
-newtype DbUser = DbUser { dbToUser :: M.User.User }
+newtype DbUser = DbUser { dbToUser :: User }
 instance FromRow DbUser where
   fromRow = DbUser . toUser <$> fromRow
-    where toUser        (        id,        name,        age,        email ) =
-            M.User.User { M.User.id, M.User.name, M.User.age, M.User.email }
+    where toUser ( id, name, age, email ) =
+            User { id, name, age, email }
 
 -- V1: call db fns directly
 -- V2: create a type to hold the db setting, use typeclass for operations, put evidence in Env
@@ -23,7 +31,22 @@ initDB dbfile = withConnection dbfile $ \conn ->
 transact :: FilePath -> (Connection -> IO a) -> IO a
 transact dbfile act = withConnection dbfile $ \conn -> withTransaction conn (act conn)
 
-listUsers :: Connection -> IO [M.User.User]
+listUsers :: Connection -> IO [User]
 listUsers conn = do
-    results <- query conn "select * from users" ()
-    return . map dbToUser $ results
+  results <- query conn "SELECT id, name, age, email FROM users" ()
+  return . map dbToUser $ results
+
+getUser :: Integer -> Connection -> IO (Maybe User)
+getUser rowId conn = do
+  results <- query conn "SELECT id, name, age, email FROM users WHERE id = ?" [rowId]
+  let maybeDbUser = listToMaybe results
+      maybeUser = dbToUser <$> maybeDbUser
+  return maybeUser
+
+createUser :: M.User.NewUser -> Connection -> IO User
+createUser newUser conn = do
+    execute conn "INSERT INTO users (name, age, email) values (?, ?, ?)" (userTuple newUser)
+    rowId <- lastInsertRowId conn
+    fromJust <$> getUser (fromIntegral rowId) conn
+  where
+    userTuple (NewUser { newName, newAge, newEmail }) = (newName, newAge, newEmail)

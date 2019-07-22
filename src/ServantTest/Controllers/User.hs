@@ -5,6 +5,7 @@ import Data.Maybe (listToMaybe)
 import Data.List (sortOn)
 import Control.Monad.IO.Class
 import ServantTest.Models.User (User(..))
+import qualified ServantTest.Sqlite as Db
 
 users :: [User]
 users = [ User 1 "Isaac Newton" 26 "isaac@newton.com"
@@ -18,7 +19,7 @@ sortOnName :: [User] -> [User]
 sortOnName = sortOn name
 
 listUsers :: MonadIO m => ([User] -> [User]) -> m [User]
-listUsers listTransform = return $ listTransform users
+listUsers listTransform = liftIO $ listTransform <$> Db.transact "test.db" Db.listUsers
 
 getUser :: MonadIO m => Integer -> m (Maybe User)
-getUser idParam = return . listToMaybe . filter ((idParam ==) . id) $ users
+getUser idParam = liftIO . Db.transact "test.db" $ Db.getUser idParam
