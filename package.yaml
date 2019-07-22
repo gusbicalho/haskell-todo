@@ -67,6 +67,7 @@ library:
   - aeson-extra
   - mtl
   - servant-server
+  - sqlite-simple
   - text
   - time
   - wai
