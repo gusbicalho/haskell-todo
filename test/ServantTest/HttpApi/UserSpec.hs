@@ -6,14 +6,51 @@ import Test.Hspec.Wai
 
 import Network.Wai
 import Servant
+import Control.Monad.Reader
 
+import qualified ServantTest.Env as Env
+import qualified ServantTest.Config as Config
+import qualified ServantTest.Sqlite as Db
+import qualified ServantTest.Models.User as M.User
+import ServantTest.Models.User (NewUser(..))
 import ServantTest.HttpApi.User (api, server)
 
-app :: Application
-app = serve api server
+dbfile :: FilePath
+dbfile = ".tempdbs_usertest.db"
+
+prepareDb :: Env.Env -> IO ()
+prepareDb env = do
+    let t = Db.getTransactor env
+    Db.transact t $ do
+      users <- Db.listUsers
+      mapM_ Db.deleteUser (map M.User.id users)
+      Db.createUser user1
+      Db.createUser user2
+    return ()
+  where user1 = NewUser { newName = "Isaac Newton"
+                        , newAge = 26
+                        , newEmail = "isaac@newton.com"
+                        }
+        user2 = NewUser { newName = "Albert Einstein"
+                        , newAge = 42
+                        , newEmail = "albert@einstein.com"
+                        }
+
+app :: IO Application
+app = do
+  env <- Env.buildEnv config
+  prepareDb env
+  let hoisted = hoistServer api (provideDependencies env) server
+  return $ serve api hoisted
+  where provideDependencies env m = runReaderT m env
+        config = Config.Config {
+          Config.port = 8080
+        , Config.version = "testversion"
+        , Config.sqliteFile = dbfile
+        }
 
 spec :: Spec
-spec = with (return app) $ do
+spec = with app $ do
   describe "GET /" $ do
     it "responds with 200" $ do
       get "/" `shouldRespondWith` 200

@@ -6,7 +6,9 @@ module ServantTest.HttpApi.User
   ) where
 
 import Control.Monad.Except
+import Control.Monad.Reader
 import Servant
+import qualified ServantTest.Env as Env
 import qualified ServantTest.WireTypes.User as Wire.User
 import qualified ServantTest.Controllers.User as C.User
 import qualified ServantTest.Adapters.User as A.User
@@ -22,6 +24,7 @@ api = Proxy
 
 type ServerConstraints m = ( MonadError ServantErr m
                            , MonadIO m
+                           , MonadReader Env.Env m
                            )
 
 server :: ServerConstraints m => ServerT API m

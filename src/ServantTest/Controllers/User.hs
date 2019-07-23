@@ -4,6 +4,7 @@ import Prelude hiding (id)
 import Data.Maybe (listToMaybe)
 import Data.List (sortOn)
 import Control.Monad.IO.Class
+import Control.Monad.Reader
 import ServantTest.Models.User (User(..))
 import qualified ServantTest.Sqlite as Db
 
@@ -18,8 +19,15 @@ sortOnAge = sortOn age
 sortOnName :: [User] -> [User]
 sortOnName = sortOn name
 
-listUsers :: MonadIO m => ([User] -> [User]) -> m [User]
-listUsers listTransform = liftIO $ listTransform <$> Db.transact "test.db" Db.listUsers
+type ControllerConstraints m env t stmt = (MonadReader env m, Db.HasTransactor env t, Db.Transactor t m stmt, Db.UserDb stmt)
 
-getUser :: MonadIO m => Integer -> m (Maybe User)
-getUser idParam = liftIO . Db.transact "test.db" $ Db.getUser idParam
+listUsers :: ControllerConstraints m env t stmt => ([User] -> [User]) -> m [User]
+listUsers listTransform = do
+  transactor <- Db.getTransactor <$> ask
+  allUsers <- Db.transact transactor Db.listUsers
+  return $ listTransform allUsers
+
+getUser :: ControllerConstraints m env t stmt => Integer -> m (Maybe User)
+getUser idParam = do
+  transactor <- Db.getTransactor <$> ask
+  Db.transact transactor $ Db.getUser idParam

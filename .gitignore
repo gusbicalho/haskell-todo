@@ -4,3 +4,4 @@ servant-test.cabal
 *.hi
 *.o
 *.prof
+*.db

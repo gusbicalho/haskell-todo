@@ -15,8 +15,15 @@ import Common.Version.Class (HasVersion(..))
 
 data Config = Config { port :: Port
                      , version :: T.Text
+                     , sqliteFile :: FilePath
                      }
   deriving (Eq, Show)
+
+class HasConfig p where
+  getConfig :: p -> Config
+
+instance HasConfig Config where
+  getConfig = id
 
 instance HasVersion Config where
   getVersion = version
@@ -28,10 +35,10 @@ type API = CS.API Config
 api :: Proxy API
 api = Proxy
 
-type ServerConstraints m = CS.ServerConstraints m Config
+type ServerConstraints m c = (HasConfig c, CS.ServerConstraints m c)
 
-server :: ServerConstraints m => ServerT API m
-server = ask
+server :: ServerConstraints m c => ServerT API m
+server = getConfig <$> ask
 
 loadConfig :: IO Config
 loadConfig = CL.loadConfig

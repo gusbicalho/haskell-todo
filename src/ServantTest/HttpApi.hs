@@ -21,7 +21,7 @@ type OpsAPI =
 
 type OpsServerConstraints m a =
   ( Version.ServerConstraints m a
-  , Config.ServerConstraints m
+  , Config.ServerConstraints m a
   )
 
 opsServer :: forall m a. OpsServerConstraints m a => ServerT OpsAPI m

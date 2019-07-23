@@ -7,20 +7,25 @@ import Control.Monad.Reader
 import Servant
 
 import qualified ServantTest.Config as Config
+import qualified ServantTest.Env as Env
 import qualified ServantTest.HttpApi as HttpApi
 
 startApp :: IO ()
 startApp = do
   config <- Config.loadConfig
-  startHttpApi config
+  env <- Env.buildEnv config
+  startHttpApi env
 
-type AppM = ReaderT Config.Config Handler
+-- type ReadConfigT m = ReaderT Config.Config m
+type ReadEnvT m = ReaderT Env.Env m
 
-startHttpApi :: Config.Config -> IO ()
-startHttpApi config = do
-    let port = Config.port config
+type AppM = ReadEnvT Handler
+
+startHttpApi :: Env.Env -> IO ()
+startHttpApi env = do
+    let port = Config.port . Env.config $ env
     putStrLn $ "Server running at port " ++ show port
     run port (HttpApi.app provideDependencies)
   where
     provideDependencies :: AppM x -> Handler x
-    provideDependencies m = runReaderT m config
+    provideDependencies m = runReaderT m env
