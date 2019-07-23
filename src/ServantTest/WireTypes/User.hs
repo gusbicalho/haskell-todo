@@ -27,3 +27,10 @@ $(deriveJSON defaultOptions ''SingleUser)
 
 newtype ManyUsers = ManyUsers { users :: [User] } deriving (Eq, Show)
 $(deriveJSON defaultOptions ''ManyUsers)
+
+data NewUserInput = NewUserInput {
+  input_name :: T.Text
+, input_age :: Int
+, input_email :: T.Text
+} deriving (Eq, Show)
+$(deriveJSON defaultOptions { fieldLabelModifier = tail . dropWhile (not . ('_' ==)) } ''NewUserInput)

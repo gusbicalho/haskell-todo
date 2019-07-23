@@ -13,11 +13,10 @@ import qualified ServantTest.WireTypes.User as Wire.User
 import qualified ServantTest.Controllers.User as C.User
 import qualified ServantTest.Adapters.User as A.User
 
-type API = ListUsersAPI
-      :<|> GetUserAPI
-
-type ListUsersAPI = QueryParam "sortBy" Wire.User.SortBy :> Get '[JSON] Wire.User.ManyUsers
-type GetUserAPI = Capture "userid" Integer :> Get '[JSON] Wire.User.SingleUser
+type API = QueryParam "sortBy" Wire.User.SortBy :> Get '[JSON] Wire.User.ManyUsers
+      :<|> ReqBody '[JSON] Wire.User.NewUserInput :> Post '[JSON] Wire.User.SingleUser
+      :<|> Capture "userid" Integer :> Get '[JSON] Wire.User.SingleUser
+      :<|> Capture "userid" Integer :> Delete '[JSON] Wire.User.SingleUser
 
 api :: Proxy API
 api = Proxy
@@ -29,16 +28,20 @@ type ServerConstraints m = ( MonadError ServantErr m
 
 server :: ServerConstraints m => ServerT API m
 server = listUsers
+    :<|> createUser
     :<|> getUser
+    :<|> deleteUser
+  where -- Handlers
+    listUsers Nothing               = A.User.manyWire <$> C.User.listUsers id
+    listUsers (Just Wire.User.Age)  = A.User.manyWire <$> C.User.listUsers C.User.sortOnAge
+    listUsers (Just Wire.User.Name) = A.User.manyWire <$> C.User.listUsers C.User.sortOnName
 
--- Handlers
+    createUser newUserInput = A.User.singleWire <$> C.User.createUser (A.User.inputToNewUser newUserInput)
 
-listUsers :: ServerConstraints m => ServerT ListUsersAPI m
-listUsers Nothing               = A.User.manyWire <$> C.User.listUsers id
-listUsers (Just Wire.User.Age)  = A.User.manyWire <$> C.User.listUsers C.User.sortOnAge
-listUsers (Just Wire.User.Name) = A.User.manyWire <$> C.User.listUsers C.User.sortOnName
+    getUser idParam = result =<< C.User.getUser idParam
+      where result Nothing  = throwError err404
+            result (Just x) = return $ A.User.singleWire x
 
-getUser :: ServerConstraints m => ServerT GetUserAPI m
-getUser idParam = result =<< C.User.getUser idParam
-  where result Nothing  = throwError err404
-        result (Just x) = return $ A.User.singleWire x
+    deleteUser idParam = result =<< C.User.deleteUser idParam
+      where result Nothing  = throwError err404
+            result (Just x) = return $ A.User.singleWire x

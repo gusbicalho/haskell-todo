@@ -3,7 +3,7 @@ module ServantTest.Controllers.User where
 import Prelude hiding (id)
 import Data.List (sortOn)
 import Control.Monad.Reader
-import ServantTest.Models.User (User(..))
+import ServantTest.Models.User (User(..), NewUser(..))
 import ServantTest.Db.Transactor (Transactor(..), HasTransactor(..))
 import ServantTest.Db.User as Db.User
 
@@ -30,3 +30,13 @@ getUser :: ControllerConstraints m env t stmt => Integer -> m (Maybe User)
 getUser idParam = do
   transactor <- getTransactor <$> ask
   transact transactor $ Db.User.getUser idParam
+
+createUser :: ControllerConstraints m env t stmt => NewUser -> m User
+createUser newUser = do
+  transactor <- getTransactor <$> ask
+  transact transactor $ Db.User.createUser newUser
+
+deleteUser :: ControllerConstraints m env t stmt => Integer -> m (Maybe User)
+deleteUser idParam = do
+  transactor <- getTransactor <$> ask
+  transact transactor $ Db.User.deleteUser idParam
