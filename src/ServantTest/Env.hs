@@ -1,9 +1,10 @@
 module ServantTest.Env where
 
-import Control.Monad.IO.Class
 import Common.Version.Class (HasVersion(..))
 import ServantTest.Config (Config(..), HasConfig(..))
-import ServantTest.Sqlite (Transactor (..), HasTransactor (..), UserDb(..), SqliteDb, sqliteDb)
+import ServantTest.Db.Transactor (Transactor (..), HasTransactor (..))
+import ServantTest.Db.SQLite (SqliteDb, sqliteDb)
+import qualified ServantTest.Db.User as Db.User
 
 data Env = Env {
   config :: Config
@@ -23,7 +24,7 @@ buildEnv :: Config -> IO Env
 buildEnv config = do
   let dbfile = sqliteFile config
       sqlite = sqliteDb dbfile
-  transact sqlite initDB
+  transact sqlite Db.User.initDB
   return Env {
     config
   , sqlite

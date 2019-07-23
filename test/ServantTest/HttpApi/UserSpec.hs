@@ -10,7 +10,8 @@ import Control.Monad.Reader
 
 import qualified ServantTest.Env as Env
 import qualified ServantTest.Config as Config
-import qualified ServantTest.Sqlite as Db
+import ServantTest.Db.Transactor (Transactor(..), HasTransactor(..))
+import qualified ServantTest.Db.User as Db.User
 import qualified ServantTest.Models.User as M.User
 import ServantTest.Models.User (NewUser(..))
 import ServantTest.HttpApi.User (api, server)
@@ -20,12 +21,12 @@ dbfile = ".tempdbs_usertest.db"
 
 prepareDb :: Env.Env -> IO ()
 prepareDb env = do
-    let t = Db.getTransactor env
-    Db.transact t $ do
-      users <- Db.listUsers
-      mapM_ Db.deleteUser (map M.User.id users)
-      Db.createUser user1
-      Db.createUser user2
+    let t = getTransactor env
+    transact t $ do
+      users <- Db.User.listUsers
+      mapM_ Db.User.deleteUser (map M.User.id users)
+      Db.User.createUser user1
+      Db.User.createUser user2
     return ()
   where user1 = NewUser { newName = "Isaac Newton"
                         , newAge = 26

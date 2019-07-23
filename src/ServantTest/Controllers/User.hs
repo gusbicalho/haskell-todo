@@ -1,12 +1,11 @@
 module ServantTest.Controllers.User where
 
 import Prelude hiding (id)
-import Data.Maybe (listToMaybe)
 import Data.List (sortOn)
-import Control.Monad.IO.Class
 import Control.Monad.Reader
 import ServantTest.Models.User (User(..))
-import qualified ServantTest.Sqlite as Db
+import ServantTest.Db.Transactor (Transactor(..), HasTransactor(..))
+import ServantTest.Db.User as Db.User
 
 users :: [User]
 users = [ User 1 "Isaac Newton" 26 "isaac@newton.com"
@@ -19,15 +18,15 @@ sortOnAge = sortOn age
 sortOnName :: [User] -> [User]
 sortOnName = sortOn name
 
-type ControllerConstraints m env t stmt = (MonadReader env m, Db.HasTransactor env t, Db.Transactor t m stmt, Db.UserDb stmt)
+type ControllerConstraints m env t stmt = (MonadReader env m, HasTransactor env t, Transactor t m stmt, UserDb stmt)
 
 listUsers :: ControllerConstraints m env t stmt => ([User] -> [User]) -> m [User]
 listUsers listTransform = do
-  transactor <- Db.getTransactor <$> ask
-  allUsers <- Db.transact transactor Db.listUsers
+  transactor <- getTransactor <$> ask
+  allUsers <- transact transactor Db.User.listUsers
   return $ listTransform allUsers
 
 getUser :: ControllerConstraints m env t stmt => Integer -> m (Maybe User)
 getUser idParam = do
-  transactor <- Db.getTransactor <$> ask
-  Db.transact transactor $ Db.getUser idParam
+  transactor <- getTransactor <$> ask
+  transact transactor $ Db.User.getUser idParam
