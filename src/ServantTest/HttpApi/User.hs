@@ -32,16 +32,21 @@ server = listUsers
     :<|> getUser
     :<|> deleteUser
   where -- Handlers
-    listUsers Nothing               = A.User.manyWire <$> C.User.listUsers id
-    listUsers (Just Wire.User.Age)  = A.User.manyWire <$> C.User.listUsers C.User.sortOnAge
-    listUsers (Just Wire.User.Name) = A.User.manyWire <$> C.User.listUsers C.User.sortOnName
+    listUsers sortBy = ask >>= \env ->
+        A.User.manyWire <$> C.User.listUsers (sorter sortBy) env
+      where sorter Nothing               = id
+            sorter (Just Wire.User.Age)  = C.User.sortOnAge
+            sorter (Just Wire.User.Name) = C.User.sortOnName
 
-    createUser newUserInput = A.User.singleWire <$> C.User.createUser (A.User.inputToNewUser newUserInput)
+    createUser newUserInput = ask >>= \env ->
+      A.User.singleWire <$> C.User.createUser (A.User.inputToNewUser newUserInput) env
 
-    getUser idParam = result =<< C.User.getUser idParam
+    getUser idParam = ask >>= \env ->
+      C.User.getUser idParam env >>= result
       where result Nothing  = throwError err404
             result (Just x) = return $ A.User.singleWire x
 
-    deleteUser idParam = result =<< C.User.deleteUser idParam
+    deleteUser idParam = ask >>= \env ->
+      C.User.deleteUser idParam env >>= result
       where result Nothing  = throwError err404
             result (Just x) = return $ A.User.singleWire x

@@ -2,7 +2,6 @@ module ServantTest.Controllers.User where
 
 import Prelude hiding (id)
 import Data.List (sortOn)
-import Control.Monad.Reader
 import ServantTest.Models.User (User(..), NewUser(..))
 import ServantTest.Db.Transactor (Transactor(..), HasTransactor(..))
 import ServantTest.Db.User as Db.User
@@ -18,25 +17,25 @@ sortOnAge = sortOn userAge
 sortOnName :: [User] -> [User]
 sortOnName = sortOn userName
 
-type ControllerConstraints m env t stmt = (MonadReader env m, HasTransactor env t, Transactor t m stmt, UserDb stmt)
+type ControllerConstraints env t m stmt = (HasTransactor env t, Transactor t m stmt, UserDb stmt)
 
-listUsers :: ControllerConstraints m env t stmt => ([User] -> [User]) -> m [User]
-listUsers listTransform = do
-  transactor <- getTransactor <$> ask
+listUsers :: ControllerConstraints env t m stmt => ([User] -> [User]) -> env -> m [User]
+listUsers listTransform env = do
+  let transactor = getTransactor env
   allUsers <- transact transactor Db.User.listUsers
   return $ listTransform allUsers
 
-getUser :: ControllerConstraints m env t stmt => Integer -> m (Maybe User)
-getUser idParam = do
-  transactor <- getTransactor <$> ask
+getUser :: ControllerConstraints env t m stmt => Integer -> env -> m (Maybe User)
+getUser idParam env = do
+  let transactor = getTransactor env
   transact transactor $ Db.User.getUser idParam
 
-createUser :: ControllerConstraints m env t stmt => NewUser -> m User
-createUser newUser = do
-  transactor <- getTransactor <$> ask
+createUser :: ControllerConstraints env t m stmt => NewUser -> env -> m User
+createUser newUser env = do
+  let transactor = getTransactor env
   transact transactor $ Db.User.createUser newUser
 
-deleteUser :: ControllerConstraints m env t stmt => Integer -> m (Maybe User)
-deleteUser idParam = do
-  transactor <- getTransactor <$> ask
+deleteUser :: ControllerConstraints env t m stmt => Integer -> env -> m (Maybe User)
+deleteUser idParam env = do
+  let transactor = getTransactor env
   transact transactor $ Db.User.deleteUser idParam

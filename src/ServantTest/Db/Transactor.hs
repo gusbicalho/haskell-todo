@@ -1,6 +1,6 @@
 module ServantTest.Db.Transactor where
 
-class Transactor t transactionM statement | t -> statement where
+class Monad transactionM => Transactor t transactionM statement | t -> statement where
   transact :: t -> statement a -> transactionM a
 
 class HasTransactor p t | p -> t where
