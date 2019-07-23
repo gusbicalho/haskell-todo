@@ -5,6 +5,7 @@ module ServantTest.WireTypes.User where
 import Servant
 import Data.Aeson.TH
 import qualified Data.Text as T
+import Common.Util.AesonHelpers
 
 data SortBy = Age | Name
 instance FromHttpApiData SortBy where
@@ -15,12 +16,13 @@ instance FromHttpApiData SortBy where
     "Name" -> return Name
     _ -> fail "Invalid SortBy param"
 
-data User = User { id :: Integer
-                 , name :: T.Text
-                 , age :: Int
-                 , email :: T.Text
-                 } deriving (Eq, Show)
-$(deriveJSON defaultOptions ''User)
+data User = User {
+  user_id :: Integer
+, user_name :: T.Text
+, user_age :: Int
+, user_email :: T.Text
+} deriving (Eq, Show)
+$(deriveJSON defaultOptions { fieldLabelModifier = drop_prefix } ''User)
 
 newtype SingleUser = SingleUser { user :: User } deriving (Eq, Show)
 $(deriveJSON defaultOptions ''SingleUser)
@@ -33,4 +35,4 @@ data NewUserInput = NewUserInput {
 , input_age :: Int
 , input_email :: T.Text
 } deriving (Eq, Show)
-$(deriveJSON defaultOptions { fieldLabelModifier = tail . dropWhile (not . ('_' ==)) } ''NewUserInput)
+$(deriveJSON defaultOptions { fieldLabelModifier = drop_prefix } ''NewUserInput)

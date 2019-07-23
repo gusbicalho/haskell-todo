@@ -14,7 +14,7 @@ newtype DbUser = DbUser { dbToUser :: User }
 instance FromRow DbUser where
   fromRow = DbUser . toUser <$> fromRow
     where toUser ( id, name, age, email ) =
-            User { id, name, age, email }
+              User id  name  age  email
 
 class UserDb statement where
   initDB :: statement ()

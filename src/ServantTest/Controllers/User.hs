@@ -13,10 +13,10 @@ users = [ User 1 "Isaac Newton" 26 "isaac@newton.com"
         ]
 
 sortOnAge :: [User] -> [User]
-sortOnAge = sortOn age
+sortOnAge = sortOn userAge
 
 sortOnName :: [User] -> [User]
-sortOnName = sortOn name
+sortOnName = sortOn userName
 
 type ControllerConstraints m env t stmt = (MonadReader env m, HasTransactor env t, Transactor t m stmt, UserDb stmt)
 
