@@ -6,11 +6,6 @@ import ServantTest.Models.User (User(..), NewUser(..))
 import ServantTest.Db.Transactor (Transactor(..), HasTransactor(..))
 import ServantTest.Db.User as Db.User
 
-users :: [User]
-users = [ User 1 "Isaac Newton" 26 "isaac@newton.com"
-        , User 2 "Albert Einstein" 42 "albert@einstein.com"
-        ]
-
 sortOnAge :: [User] -> [User]
 sortOnAge = sortOn userAge
 

@@ -70,7 +70,6 @@ library:
   - sqlite-simple
   - text
   - time
-  - unliftio-core
   - wai
   - warp
 
