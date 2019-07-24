@@ -14,4 +14,4 @@ data NewUser = NewUser {
   newName :: T.Text
 , newAge :: Int
 , newEmail :: T.Text
-}
+} deriving (Eq, Show)

@@ -13,33 +13,42 @@ spec :: Spec
 spec = do
   describe "listUsers" $ do
     it "should list the users from db" $ do
-      runTest (listUsers id MockDb) `shouldBe` ([mockUser], [[DbAction "list users"]])
+      runTest (listUsers id mockDb) `shouldBe` ([mockUser], [[ListUsers]])
   describe "getUser" $ do
     it "should get a user from db if it exists" $ do
-      runTest (getUser 7 MockDb)
-        `shouldBe` (Just mockUser, [[DbAction "get user 7"]])
+      runTest (getUser 7 mockDb)
+        `shouldBe` (Just mockUser, [[GetUser 7]])
     it "should return Nothing if the user does not exist" $ do
-      runTest (getUser nonExistingId MockDb)
-        `shouldBe` (Nothing, [[DbAction $ "get user " ++ show nonExistingId]])
+      runTest (getUser nonExistingId mockDb)
+        `shouldBe` (Nothing, [[GetUser nonExistingId]])
   describe "createUser" $ do
     it "should insert the new user in the Db and return the full User" $ do
-      runTest (createUser mockNewUser MockDb)
-        `shouldBe` (mockUser, [[DbAction $ "create user " ++ show (newName mockNewUser)]])
+      runTest (createUser mockNewUser mockDb)
+        `shouldBe` (mockUser, [[CreateUser mockNewUser]])
   describe "deleteUser" $ do
     it "should delete the existing user in the Db and return it" $ do
-      runTest (deleteUser 7 MockDb)
-        `shouldBe` (Just mockUser, [[DbAction $ "delete user 7"]])
+      runTest (deleteUser 7 mockDb)
+        `shouldBe` (Just mockUser, [[DeleteUser 7]])
     it "should attempt to delete a non-existing user, and return nothing" $ do
-      runTest (deleteUser nonExistingId MockDb)
-        `shouldBe` (Nothing, [[DbAction $ "delete user " ++ show nonExistingId]])
+      runTest (deleteUser nonExistingId mockDb)
+        `shouldBe` (Nothing, [[DeleteUser nonExistingId]])
 
--- TODO get rid of this orphan instance somehow
-instance Db.User.UserDb DbActions where
-  initDB = DbActions [DbAction "create table"] ()
-  listUsers = DbActions [DbAction "list users"] [mockUser]
-  getUser idParam = DbActions [DbAction $ "get user " ++ show idParam] $ getMockUser idParam
-  createUser newUser = DbActions [DbAction $ "create user " ++ show (newName newUser)] mockUser
-  deleteUser idParam = DbActions [DbAction $ "delete user " ++ show idParam] $ getMockUser idParam
+data UserDbAction = CreateTable
+                  | ListUsers
+                  | CreateUser NewUser
+                  | GetUser Integer
+                  | DeleteUser Integer
+                  deriving (Eq, Show)
+
+mockDb :: MockDb UserDbAction
+mockDb = MockDb
+
+instance Db.User.UserDb (DbActions UserDbAction) where
+  initDB = DbActions [CreateTable] ()
+  listUsers = DbActions [ListUsers] [mockUser]
+  getUser idParam = DbActions [GetUser idParam] $ getMockUser idParam
+  createUser newUser = DbActions [CreateUser newUser] mockUser
+  deleteUser idParam = DbActions [DeleteUser idParam] $ getMockUser idParam
 
 nonExistingId :: Integer
 nonExistingId = 99

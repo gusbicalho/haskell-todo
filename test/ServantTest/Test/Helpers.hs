@@ -3,17 +3,18 @@ module ServantTest.Test.Helpers where
 import Control.Monad.Writer
 import ServantTest.Db.Transactor (Transactor(..), HasTransactor(..))
 
-data MockDb = MockDb
-data DbAction = DbAction String deriving (Eq, Show)
-data DbActions a = DbActions [DbAction] a deriving (Eq, Show)
+data MockDb action = MockDb
 
-type TestM = Writer [[DbAction]]
+data DbActions action a = DbActions [action] a deriving (Eq, Show)
 
-instance Transactor MockDb TestM DbActions where
-  transact :: MockDb -> DbActions a -> TestM a
+type TestM action = Writer [[action]]
+
+instance Transactor (MockDb action) (TestM action) (DbActions action) where
+  transact :: MockDb action -> DbActions action a -> TestM action a
   transact _ (DbActions actions result) = tell [actions] >> return result
 
-instance HasTransactor MockDb MockDb where
+instance HasTransactor (MockDb action) (MockDb action) where
   getTransactor = id
 
+runTest :: Writer w a -> (a, w)
 runTest = runWriter
