@@ -28,9 +28,9 @@ configuredApp = do
 
 spec :: Spec
 spec = with configuredApp $ do
-  describe "GET /ops/version" $ do
-    it "responds with 200" $ do
-      get "/ops/version" `shouldRespondWith` 200
   describe "GET /ops/config" $ do
     it "responds with 200" $ do
       get "/ops/config/dump" `shouldRespondWith` 200
+  describe "GET /api/version" $ do
+    it "responds with 200" $ do
+      get "/api/version" `shouldRespondWith` 200

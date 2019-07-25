@@ -14,37 +14,37 @@ import qualified ServantTest.HttpApi.User as User
 
 type OpsAPI =
   "ops" :> (
-    "version" :> Version.API
-    :<|>
     "config" :> Config.API
   )
 
 type OpsServerConstraints m a =
-  ( Version.ServerConstraints m a
-  , Config.ServerConstraints m a
+  ( Config.ServerConstraints m a
   )
 
 opsServer :: forall m a. OpsServerConstraints m a => ServerT OpsAPI m
-opsServer = Version.server
-       :<|> Config.server
+opsServer = Config.server
 
 type ApplicationAPI =
   "api" :> (
+    "version" :> Version.API
+    :<|>
     "users" :> User.API
   )
 
-type ApplicationServerConstraints m =
-  User.ServerConstraints m
+type ApplicationServerConstraints m a =
+  ( Version.ServerConstraints m a
+  , User.ServerConstraints m
+  )
 
-applicationServer :: forall m. ApplicationServerConstraints m => ServerT ApplicationAPI m
-applicationServer = User.server
+applicationServer :: ApplicationServerConstraints m a => ServerT ApplicationAPI m
+applicationServer = Version.server :<|> User.server
 
 type API = OpsAPI
       :<|> ApplicationAPI
 
 type ServerConstraints m a =
   ( OpsServerConstraints m a
-  , ApplicationServerConstraints m
+  , ApplicationServerConstraints m a
   )
 
 api :: Proxy API

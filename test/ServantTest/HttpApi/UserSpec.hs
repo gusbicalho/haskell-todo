@@ -1,7 +1,7 @@
 {- HLINT ignore "Redundant do" -}
 module ServantTest.HttpApi.UserSpec (spec) where
 
-import Test.Hspec
+import Test.Hspec hiding (pendingWith)
 import Test.Hspec.Wai
 
 import Network.Wai
@@ -75,3 +75,9 @@ spec = with app $ do
       let userRequest = get "/99"
       it "responds with 404" $ do
         userRequest `shouldRespondWith` 404
+  describe "POST /" $ do
+    it "should be tested" $ do
+      pendingWith "TODO"
+  describe "DELETE /:id" $ do
+    it "should be tested" $ do
+      pendingWith "TODO"
