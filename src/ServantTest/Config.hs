@@ -19,11 +19,8 @@ data Config = Config { port :: Port
                      }
   deriving (Eq, Show)
 
-class HasConfig p where
-  getConfig :: p -> Config
-
-instance HasConfig Config where
-  getConfig = id
+instance HasVal "config" Config Config where
+  getVal = id
 
 instance HasVal "version" Version Config where
   getVal = fromText . version
@@ -35,10 +32,10 @@ type API = CS.API Config
 api :: Proxy API
 api = Proxy
 
-type ServerConstraints m c = (HasConfig c, CS.ServerConstraints m c)
+type ServerConstraints m c = (HasVal "config" Config c, CS.ServerConstraints m c)
 
 server :: ServerConstraints m c => ServerT API m
-server = asks getConfig
+server = asks $ getVal @"config"
 
 loadConfig :: IO Config
 loadConfig = CL.loadConfig

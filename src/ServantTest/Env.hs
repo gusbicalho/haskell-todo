@@ -1,7 +1,7 @@
 module ServantTest.Env where
 
 import Common.Version.Class (HasVal(..), Version)
-import ServantTest.Config (Config(..), HasConfig(..))
+import ServantTest.Config (Config(..))
 import ServantTest.Db.Transactor (Transactor (..), HasTransactor (..))
 import ServantTest.Db.SQLite (SqliteDb, sqliteDb)
 import qualified ServantTest.Db.User as Db.User
@@ -17,8 +17,8 @@ instance HasTransactor Env SqliteDb where
 instance HasVal "version" Version Env where
   getVal = getVal @"version" . config
 
-instance HasConfig Env where
-  getConfig = config
+instance HasVal "config" Config Env where
+  getVal = config
 
 buildEnv :: Config -> IO Env
 buildEnv config = do
