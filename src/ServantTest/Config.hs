@@ -11,7 +11,7 @@ import qualified Data.Text as T
 
 import qualified Common.Config.Server as CS
 import qualified Common.Config.Loader as CL
-import Common.Version.Class (HasVersion(..))
+import Common.Version.Class (HasVal(..), Version, fromText)
 
 data Config = Config { port :: Port
                      , version :: T.Text
@@ -19,14 +19,11 @@ data Config = Config { port :: Port
                      }
   deriving (Eq, Show)
 
-class HasConfig p where
-  getConfig :: p -> Config
+instance HasVal "config" Config Config where
+  getVal = id
 
-instance HasConfig Config where
-  getConfig = id
-
-instance HasVersion Config where
-  getVersion = version
+instance HasVal "version" Version Config where
+  getVal = fromText . version
 
 $(deriveJSON defaultOptions ''Config)
 
@@ -35,10 +32,10 @@ type API = CS.API Config
 api :: Proxy API
 api = Proxy
 
-type ServerConstraints m c = (HasConfig c, CS.ServerConstraints m c)
+type ServerConstraints m c = (HasVal "config" Config c, CS.ServerConstraints m c)
 
 server :: ServerConstraints m c => ServerT API m
-server = asks getConfig
+server = asks $ getVal @"config"
 
 loadConfig :: IO Config
 loadConfig = CL.loadConfig

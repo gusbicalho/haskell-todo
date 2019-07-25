@@ -10,7 +10,8 @@ import Control.Monad.Reader
 
 import qualified ServantTest.Env as Env
 import qualified ServantTest.Config as Config
-import ServantTest.Db.Transactor (Transactor(..), HasTransactor(..))
+import Common.HasVal.Class
+import ServantTest.Db.Transactor (Transactor(..))
 import qualified ServantTest.Db.User as Db.User
 import ServantTest.Models.User
 import ServantTest.HttpApi.User (api, server)
@@ -20,7 +21,7 @@ dbfile = ".tempdbs_usertest.db"
 
 prepareDb :: Env.Env -> IO ()
 prepareDb env = do
-    let t = getTransactor env
+    let t = getVal @"transactor" env
     transact t $ do
       users <- Db.User.listUsers
       mapM_ (Db.User.deleteUser . userId) users

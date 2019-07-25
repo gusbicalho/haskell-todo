@@ -1,14 +1,23 @@
 module Common.Version.Class
-  ( HasVersion(..)
+  ( HasVal (..)
+  , Version
+  , toText
+  , fromText
   ) where
 
 import qualified Data.Text as T
+import Common.HasVal.Class
 
-class HasVersion a where
-  getVersion :: a -> T.Text
+newtype Version = Version { toText :: T.Text } deriving (Eq, Show)
 
-instance HasVersion String where
-  getVersion = T.pack
+fromText :: T.Text -> Version
+fromText = Version
 
-instance HasVersion T.Text where
-  getVersion = id
+instance HasVal "version" Version T.Text where
+  getVal = Version
+
+instance HasVal "version" Version String where
+  getVal = Version . T.pack
+
+instance HasVal "version" Version Version where
+  getVal = id
