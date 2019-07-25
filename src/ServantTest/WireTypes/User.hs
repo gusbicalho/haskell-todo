@@ -22,7 +22,7 @@ data User = User {
 , user_age :: Int
 , user_email :: T.Text
 } deriving (Eq, Show)
-$(deriveJSON defaultOptions { fieldLabelModifier = drop_prefix } ''User)
+$(deriveJSON defaultOptions { fieldLabelModifier = dropPrefix_ } ''User)
 
 newtype SingleUser = SingleUser { user :: User } deriving (Eq, Show)
 $(deriveJSON defaultOptions ''SingleUser)
@@ -35,4 +35,4 @@ data NewUserInput = NewUserInput {
 , input_age :: Int
 , input_email :: T.Text
 } deriving (Eq, Show)
-$(deriveJSON defaultOptions { fieldLabelModifier = drop_prefix } ''NewUserInput)
+$(deriveJSON defaultOptions { fieldLabelModifier = dropPrefix_ } ''NewUserInput)

@@ -1,3 +1,5 @@
+{-# LANGUAGE RecordWildCards #-}
+
 module ServantTest.Db.User
   ( UserDb(..)
   ) where
@@ -12,9 +14,15 @@ import ServantTest.Models.User (User(..), NewUser(..))
 
 newtype DbUser = DbUser { dbToUser :: User }
 instance FromRow DbUser where
-  fromRow = DbUser . toUser <$> fromRow
-    where toUser ( id, name, age, email ) =
-              User id  name  age  email
+  fromRow = DbUser <$> user
+    where user = User <$> field <*> field <*> field <*> field
+
+newtype DbNewUser = DbNewUser NewUser
+instance ToRow DbNewUser where
+  toRow (DbNewUser NewUser {..}) = toRow ( newName
+                                         , newAge
+                                         , newEmail
+                                         )
 
 class UserDb statement where
   initDB :: statement ()
@@ -55,11 +63,9 @@ getUser' rowId conn = do
 
 createUser' :: M.User.NewUser -> Connection -> IO User
 createUser' newUser conn = do
-    execute conn "INSERT INTO users (name, age, email) values (?, ?, ?)" (userTuple newUser)
+    execute conn "INSERT INTO users (name, age, email) values (?, ?, ?)" (DbNewUser newUser)
     rowId <- lastInsertRowId conn
     fromJust <$> getUser' (fromIntegral rowId) conn
-  where
-    userTuple (NewUser { newName, newAge, newEmail }) = (newName, newAge, newEmail)
 
 deleteUser' :: Integer -> Connection -> IO (Maybe User)
 deleteUser' rowId conn = do

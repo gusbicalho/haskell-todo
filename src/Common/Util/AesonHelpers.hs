@@ -1,4 +1,4 @@
 module Common.Util.AesonHelpers where
 
-drop_prefix :: String -> String
-drop_prefix = tail . dropWhile (not . ('_' ==))
+dropPrefix_ :: String -> String
+dropPrefix_ = tail . dropWhile ('_' /=)

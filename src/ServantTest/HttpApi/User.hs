@@ -32,21 +32,32 @@ server = listUsers
     :<|> getUser
     :<|> deleteUser
   where -- Handlers
-    listUsers sortBy = ask >>= \env ->
-        A.User.manyWire <$> C.User.listUsers (sorter sortBy) env
-      where sorter Nothing               = id
-            sorter (Just Wire.User.Age)  = C.User.sortOnAge
-            sorter (Just Wire.User.Name) = C.User.sortOnName
+    listUsers sortBy = do
+        env <- ask
+        users <- C.User.listUsers (sorter sortBy) env
+        return $ A.User.manyWire users
+      where
+        sorter Nothing               = id
+        sorter (Just Wire.User.Age)  = C.User.sortOnAge
+        sorter (Just Wire.User.Name) = C.User.sortOnName
 
-    createUser newUserInput = ask >>= \env ->
-      A.User.singleWire <$> C.User.createUser (A.User.inputToNewUser newUserInput) env
+    createUser newUserInput = do
+      env <- ask
+      user <- C.User.createUser (A.User.inputToNewUser newUserInput) env
+      return $ A.User.singleWire user
 
-    getUser idParam = ask >>= \env ->
-      C.User.getUser idParam env >>= result
-      where result Nothing  = throwError err404
-            result (Just x) = return $ A.User.singleWire x
+    getUser idParam = do
+        env <- ask
+        maybeUser <- C.User.getUser idParam env
+        result maybeUser
+      where
+        result Nothing  = throwError err404
+        result (Just x) = return $ A.User.singleWire x
 
-    deleteUser idParam = ask >>= \env ->
-      C.User.deleteUser idParam env >>= result
-      where result Nothing  = throwError err404
-            result (Just x) = return $ A.User.singleWire x
+    deleteUser idParam = do
+        env <- ask
+        maybeUser <- C.User.deleteUser idParam env
+        result maybeUser
+      where
+        result Nothing  = throwError err404
+        result (Just x) = return $ A.User.singleWire x

@@ -38,7 +38,7 @@ api = Proxy
 type ServerConstraints m c = (HasConfig c, CS.ServerConstraints m c)
 
 server :: ServerConstraints m c => ServerT API m
-server = getConfig <$> ask
+server = asks getConfig
 
 loadConfig :: IO Config
 loadConfig = CL.loadConfig

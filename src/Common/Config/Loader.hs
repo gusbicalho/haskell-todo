@@ -11,6 +11,7 @@ import Data.Aeson.Types
 import Data.Aeson.Extra.Merge (lodashMerge)
 import GHC.Exts
 import Data.Either
+import Data.Foldable (foldl')
 import qualified Data.Text as T
 import System.Environment (lookupEnv)
 
@@ -19,8 +20,7 @@ type ConfigLoader = IO (Either T.Text Value)
 waterfall :: [Either T.Text Value] -> (Value, [T.Text])
 waterfall vs = (mergeAll (rights vs) (object []), lefts vs)
   where
-    mergeAll []     acc = acc
-    mergeAll (x:xs) acc = mergeAll xs (lodashMerge acc x)
+    mergeAll xs acc = foldl' lodashMerge acc xs
 
 loadConfigFrom :: FromJSON a => [ConfigLoader] -> IO (Maybe a)
 loadConfigFrom configLoaders = do
@@ -28,7 +28,7 @@ loadConfigFrom configLoaders = do
     let (result, errors) = waterfall configs
     mapM_ (printLoadError . T.unpack) errors
     case parseEither parseJSON result of
-      Left  err    -> return Nothing <* printLoadError err
+      Left  err    -> Nothing <$ printLoadError err
       Right config -> return . Just $ config
   where
     printLoadError msg = putStrLn $ "[Load Config] Load failed: " ++ msg
