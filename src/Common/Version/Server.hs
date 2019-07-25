@@ -9,14 +9,16 @@ module Common.Version.Server
   , Version
   ) where
 
+import GHC.Generics
 import Control.Monad.Reader
 import Data.Proxy
 import Servant
-import Data.Aeson.TH
-import Common.Version.Class ( HasVal(..), Version )
+import Data.Aeson
+import Common.Version.Class ( HasVal(..), Version, toText )
 
-newtype WireVersion = WireVersion { version :: Version } deriving (Eq, Show)
-$(deriveJSON defaultOptions ''WireVersion)
+newtype WireVersion = WireVersion { version :: Version } deriving (Eq, Show, Generic)
+instance ToJSON WireVersion where
+  toJSON (WireVersion v) = object [("version", String $ toText v)]
 
 type API = Get '[JSON] WireVersion
 
