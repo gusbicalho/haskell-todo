@@ -1,6 +1,6 @@
 module ServantTest.Env where
 
-import Common.Version.Class (HasVersion(..))
+import Common.Version.Class (HasVal(..), Version)
 import ServantTest.Config (Config(..), HasConfig(..))
 import ServantTest.Db.Transactor (Transactor (..), HasTransactor (..))
 import ServantTest.Db.SQLite (SqliteDb, sqliteDb)
@@ -14,8 +14,8 @@ data Env = Env {
 instance HasTransactor Env SqliteDb where
   getTransactor = sqlite
 
-instance HasVersion Env where
-  getVersion = getVersion . config
+instance HasVal "version" Version Env where
+  getVal = getVal @"version" . config
 
 instance HasConfig Env where
   getConfig = config

@@ -5,25 +5,25 @@ module Common.Version.Server
   , server
   , API
   , ServerConstraints
-  , HasVersion(..)
+  , HasVal (..)
+  , Version
   ) where
 
 import Control.Monad.Reader
 import Data.Proxy
 import Servant
 import Data.Aeson.TH
-import qualified Data.Text as T
-import Common.Version.Class ( HasVersion(..) )
+import Common.Version.Class ( HasVal(..), Version )
 
-newtype Version = Version { version :: T.Text } deriving (Eq, Show)
-$(deriveJSON defaultOptions ''Version)
+newtype WireVersion = WireVersion { version :: Version } deriving (Eq, Show)
+$(deriveJSON defaultOptions ''WireVersion)
 
-type API = Get '[JSON] Version
+type API = Get '[JSON] WireVersion
 
 api :: Proxy API
 api = Proxy
 
-type ServerConstraints m a = (HasVersion a, MonadReader a m)
+type ServerConstraints m a = (HasVal "version" Version a, MonadReader a m)
 
 server :: ServerConstraints m a => ServerT API m
-server = asks $ Version . getVersion
+server = asks $ WireVersion . getVal @"version"

@@ -11,7 +11,7 @@ import qualified Data.Text as T
 
 import qualified Common.Config.Server as CS
 import qualified Common.Config.Loader as CL
-import Common.Version.Class (HasVersion(..))
+import Common.Version.Class (HasVal(..), Version)
 
 data Config = Config { port :: Port
                      , version :: T.Text
@@ -25,8 +25,8 @@ class HasConfig p where
 instance HasConfig Config where
   getConfig = id
 
-instance HasVersion Config where
-  getVersion = version
+instance HasVal "version" Version Config where
+  getVal = version
 
 $(deriveJSON defaultOptions ''Config)
 

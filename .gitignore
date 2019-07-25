@@ -5,3 +5,6 @@ servant-test.cabal
 *.o
 *.prof
 *.db
+.idea
+out/
+*.iml
