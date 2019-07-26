@@ -18,9 +18,7 @@ instance FromHttpApiData SortBy where
 
 data User = User {
   user_id :: Integer
-, user_name :: T.Text
-, user_age :: Int
-, user_email :: T.Text
+, user_login :: T.Text
 } deriving (Eq, Show)
 $(deriveJSON defaultOptions { fieldLabelModifier = dropPrefix_ } ''User)
 
@@ -31,8 +29,7 @@ newtype ManyUsers = ManyUsers { users :: [User] } deriving (Eq, Show)
 $(deriveJSON defaultOptions ''ManyUsers)
 
 data NewUserInput = NewUserInput {
-  input_name :: T.Text
-, input_age :: Int
-, input_email :: T.Text
+  input_email :: T.Text
+, input_password :: T.Text
 } deriving (Eq, Show)
 $(deriveJSON defaultOptions { fieldLabelModifier = dropPrefix_ } ''NewUserInput)

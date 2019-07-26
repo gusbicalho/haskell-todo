@@ -13,7 +13,7 @@ spec :: Spec
 spec = do
   describe "listUsers" $ do
     it "should list the users from db" $ do
-      runTest (listUsers id mockDb) `shouldBe` ([mockUser], [[ListUsers]])
+      runTest (listUsers mockDb) `shouldBe` ([mockUser], [[ListUsers]])
   describe "getUser" $ do
     it "should get a user from db if it exists" $ do
       runTest (getUser 7 mockDb)
@@ -61,14 +61,12 @@ getMockUser idParam
 mockUser :: User
 mockUser = User {
   userId = 7
-, userName = "test"
-, userAge = 25
-, userEmail = "test@test"
+, userLogin = textToLogin "test@test"
+, userPassword = textToPassword "asdqwe"
 }
 
 mockNewUser :: NewUser
 mockNewUser = NewUser {
-  newName = "test"
-, newAge = 25
-, newEmail = "test@test"
+  newLogin = textToLogin "test@test"
+, newPassword = textToPassword "asdqwe"
 }

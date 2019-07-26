@@ -28,13 +28,11 @@ prepareDb env = do
       Db.User.createUser user1
       Db.User.createUser user2
     return ()
-  where user1 = NewUser { newName = "Isaac Newton"
-                        , newAge = 26
-                        , newEmail = "isaac@newton.com"
+  where user1 = NewUser { newLogin = "isaac@newton.com"
+                        , newPassword = "qwe123"
                         }
-        user2 = NewUser { newName = "Albert Einstein"
-                        , newAge = 42
-                        , newEmail = "albert@einstein.com"
+        user2 = NewUser { newLogin = "albert@einstein.com"
+                        , newPassword = "swordfish"
                         }
 
 app :: IO Application
@@ -56,21 +54,15 @@ spec = with app $ do
     it "responds with 200" $ do
       get "/" `shouldRespondWith` 200
     it "responds with [User]" $ do
-      let users = "{\"users\":[{\"id\":1,\"name\":\"Isaac Newton\",\"age\":26,\"email\":\"isaac@newton.com\"},{\"id\":2,\"name\":\"Albert Einstein\",\"age\":42,\"email\":\"albert@einstein.com\"}]}"
+      let users = "{\"users\":[{\"id\":1,\"login\":\"isaac@newton.com\"},{\"id\":2,\"login\":\"albert@einstein.com\"}]}"
       get "/" `shouldRespondWith` users
-    it "is able to sortBy age" $ do
-      let users = "{\"users\":[{\"id\":1,\"name\":\"Isaac Newton\",\"age\":26,\"email\":\"isaac@newton.com\"},{\"id\":2,\"name\":\"Albert Einstein\",\"age\":42,\"email\":\"albert@einstein.com\"}]}"
-      get "/?sortBy=age" `shouldRespondWith` users
-    it "is able to sortBy name" $ do
-      let users = "{\"users\":[{\"id\":2,\"name\":\"Albert Einstein\",\"age\":42,\"email\":\"albert@einstein.com\"},{\"id\":1,\"name\":\"Isaac Newton\",\"age\":26,\"email\":\"isaac@newton.com\"}]}"
-      get "/?sortBy=name" `shouldRespondWith` users
   describe "GET /:id" $ do
     describe "for a known id" $ do
       let userRequest = get "/2"
       it "responds with 200" $ do
         userRequest `shouldRespondWith` 200
       it "responds with User" $ do
-        let user = "{\"user\":{\"id\":2,\"name\":\"Albert Einstein\",\"age\":42,\"email\":\"albert@einstein.com\"}}"
+        let user = "{\"user\":{\"id\":2,\"login\":\"albert@einstein.com\"}}"
         userRequest `shouldRespondWith` user
     describe "for an unknown id" $ do
       let userRequest = get "/99"

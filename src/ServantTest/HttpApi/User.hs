@@ -13,7 +13,7 @@ import qualified ServantTest.WireTypes.User as Wire.User
 import qualified ServantTest.Controllers.User as C.User
 import qualified ServantTest.Adapters.User as A.User
 
-type API = QueryParam "sortBy" Wire.User.SortBy :> Get '[JSON] Wire.User.ManyUsers
+type API = Get '[JSON] Wire.User.ManyUsers
       :<|> ReqBody '[JSON] Wire.User.NewUserInput :> Post '[JSON] Wire.User.SingleUser
       :<|> Capture "userid" Integer :> Get '[JSON] Wire.User.SingleUser
       :<|> Capture "userid" Integer :> Delete '[JSON] Wire.User.SingleUser
@@ -32,14 +32,10 @@ server = listUsers
     :<|> getUser
     :<|> deleteUser
   where -- Handlers
-    listUsers sortBy = do
-        env <- ask
-        users <- C.User.listUsers (sorter sortBy) env
-        return $ A.User.manyWire users
-      where
-        sorter Nothing               = id
-        sorter (Just Wire.User.Age)  = C.User.sortOnAge
-        sorter (Just Wire.User.Name) = C.User.sortOnName
+    listUsers = do
+      env <- ask
+      users <- C.User.listUsers env
+      return $ A.User.manyWire users
 
     createUser newUserInput = do
       env <- ask
