@@ -12,6 +12,7 @@ import ServantTest.Db.SQLite
 import qualified ServantTest.Models.User as M.User
 import ServantTest.Models.User ( User(..)
                                , NewUser(..)
+                               , Login
                                , textToLogin
                                , textToPassword
                                , loginToText
@@ -32,11 +33,12 @@ instance ToRow DbNewUser where
                                          , passwordToText newPassword
                                          )
 
-class UserDb statement where
-  initDB :: statement ()
-  listUsers :: statement [User]
-  getUser :: Integer -> statement (Maybe User)
-  createUser :: M.User.NewUser -> statement User
+class UserDb action where
+  initDB :: action ()
+  listUsers :: action [User]
+  getUser :: Integer -> action (Maybe User)
+  createUser :: M.User.NewUser -> action User
+  findUserByLogin :: M.User.Login -> action (Maybe User)
 
 instance UserDb SQLiteAction where
   initDB :: SQLiteAction ()
@@ -52,6 +54,9 @@ instance UserDb SQLiteAction where
 
   createUser :: M.User.NewUser -> SQLiteAction User
   createUser newUser = SQLiteAction $ createUser' newUser
+
+  findUserByLogin :: M.User.Login -> SQLiteAction (Maybe User)
+  findUserByLogin login = SQLiteAction $ findUserByLogin' login
 
 listUsers' :: Connection -> IO [User]
 listUsers' conn = do
@@ -70,3 +75,10 @@ createUser' newUser conn = do
     execute conn "INSERT INTO users (login, password) values (?, ?)" (DbNewUser newUser)
     rowId <- lastInsertRowId conn
     fromJust <$> getUser' (fromIntegral rowId) conn
+
+findUserByLogin' :: Login -> Connection -> IO (Maybe User)
+findUserByLogin' login conn = do
+  results <- query conn "SELECT id, login, password FROM users WHERE login = ?" [loginToText login]
+  let maybeDbUser = listToMaybe results
+      maybeUser = dbToUser <$> maybeDbUser
+  return maybeUser

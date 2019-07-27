@@ -65,7 +65,11 @@ library:
   - base >= 4.7 && < 5
   - aeson
   - aeson-extra
+  - bytestring
+  - jose
   - mtl
+  - servant-auth
+  - servant-auth-server
   - servant-server
   - sqlite-simple
   - text

@@ -15,7 +15,7 @@ import ServantTest.Test.Helpers.TestEnv (testEnv, noop)
 configuredApp :: IO Application
 configuredApp = do
     env <- testEnv noop
-    return $ app (provideDependencies env)
+    return $ app env (provideDependencies env)
   where
     provideDependencies env m = runReaderT m env
 

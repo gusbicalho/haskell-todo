@@ -7,7 +7,7 @@ import ServantTest.Db.User as Db.User
 
 type ControllerConstraints env t m stmt = (HasVal "transactor" t env, Transactor t m stmt, UserDb stmt)
 
-listUsers :: forall env t m stmt. ControllerConstraints env t m stmt => env -> m [User]
+listUsers :: ControllerConstraints env t m stmt => env -> m [User]
 listUsers env = do
   let transactor = getVal @"transactor" env
   transact transactor Db.User.listUsers

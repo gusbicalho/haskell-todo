@@ -25,7 +25,7 @@ startHttpApi :: Env.Env -> IO ()
 startHttpApi env = do
     let port = Config.port . Env.config $ env
     putStrLn $ "Server running at port " ++ show port
-    run port (HttpApi.app provideDependencies)
+    run port (HttpApi.app env provideDependencies)
   where
     provideDependencies :: AppM x -> Handler x
     provideDependencies m = runReaderT m env

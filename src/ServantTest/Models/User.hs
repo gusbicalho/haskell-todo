@@ -8,6 +8,7 @@ module ServantTest.Models.User
   , Password
   , textToPassword
   , passwordToText
+  , LoginInput (..)
   ) where
 
 import Data.String
@@ -38,4 +39,9 @@ data User = User {
 data NewUser = NewUser {
   newLogin :: Login
 , newPassword :: Password
+} deriving (Eq, Show)
+
+data LoginInput = LoginInput {
+  loginInputLogin :: Login
+, loginInputPassword :: Password
 } deriving (Eq, Show)
