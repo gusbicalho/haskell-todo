@@ -7,6 +7,9 @@ import qualified ServantTest.Config as Config
 tempDb :: IO FilePath
 tempDb = Temp.emptySystemTempFile "test.db"
 
+noop :: a -> IO ()
+noop _ = return ()
+
 testEnv :: (Env.Env -> IO ()) -> IO Env.Env
 testEnv prepare = do
     temp <- tempDb

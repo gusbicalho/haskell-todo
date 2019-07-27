@@ -34,16 +34,16 @@ prepareDb env = do
                         , newPassword = "swordfish"
                         }
 
-testApp :: (Env.Env -> IO ()) -> IO Application
-testApp prepare = do
-    env <- testEnv prepare
+app :: IO Application
+app = do
+    env <- testEnv prepareDb
     let hoisted = hoistServer api (provideDependencies env) server
     return $ serve api hoisted
   where
     provideDependencies env m = runReaderT m env
 
 spec :: Spec
-spec = beforeAll (testApp prepareDb) $ do
+spec = beforeAll app $ do
   describe "GET /" $ do
     it "responds with 200" $ do
       get "/" `shouldRespondWith` 200

@@ -8,26 +8,19 @@ import Test.Hspec.Wai
 import Network.Wai
 import Control.Monad.Reader
 
-import ServantTest.Config (Config(..))
-import ServantTest.Env
 import ServantTest.HttpApi (app)
+
+import ServantTest.Test.Helpers.TestEnv (testEnv, noop)
 
 configuredApp :: IO Application
 configuredApp = do
-  env <- buildEnv config
-  return $ app (provideDependencies env)
-  where provideDependencies env m = runReaderT m env
-        config = Config {
-          port = 8080
-        , version = "testversion"
-        , sqliteFile = ".tempdbs_usertest.db"
-        }
-
--- configuredApp = app provideDependencies
---   where provideDependencies m = runReaderT m config
+    env <- testEnv noop
+    return $ app (provideDependencies env)
+  where
+    provideDependencies env m = runReaderT m env
 
 spec :: Spec
-spec = with configuredApp $ do
+spec = beforeAll configuredApp $ do
   describe "GET /ops/config" $ do
     it "responds with 200" $ do
       get "/ops/config/dump" `shouldRespondWith` 200
