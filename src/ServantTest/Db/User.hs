@@ -37,7 +37,6 @@ class UserDb statement where
   listUsers :: statement [User]
   getUser :: Integer -> statement (Maybe User)
   createUser :: M.User.NewUser -> statement User
-  deleteUser :: Integer -> statement (Maybe User)
 
 instance UserDb SQLiteAction where
   initDB :: SQLiteAction ()
@@ -53,9 +52,6 @@ instance UserDb SQLiteAction where
 
   createUser :: M.User.NewUser -> SQLiteAction User
   createUser newUser = SQLiteAction $ createUser' newUser
-
-  deleteUser :: Integer -> SQLiteAction (Maybe User)
-  deleteUser rowId = SQLiteAction $ deleteUser' rowId
 
 listUsers' :: Connection -> IO [User]
 listUsers' conn = do
@@ -74,11 +70,3 @@ createUser' newUser conn = do
     execute conn "INSERT INTO users (login, password) values (?, ?)" (DbNewUser newUser)
     rowId <- lastInsertRowId conn
     fromJust <$> getUser' (fromIntegral rowId) conn
-
-deleteUser' :: Integer -> Connection -> IO (Maybe User)
-deleteUser' rowId conn = do
-  maybeUser <- getUser' rowId conn
-  case maybeUser of
-    Nothing -> return ()
-    Just _  -> execute conn "DELETE FROM users WHERE id = ?" [rowId]
-  return maybeUser

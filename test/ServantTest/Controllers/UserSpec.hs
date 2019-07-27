@@ -25,19 +25,11 @@ spec = do
     it "should insert the new user in the Db and return the full User" $ do
       runTest (createUser mockNewUser mockDb)
         `shouldBe` (mockUser, [[CreateUser mockNewUser]])
-  describe "deleteUser" $ do
-    it "should delete the existing user in the Db and return it" $ do
-      runTest (deleteUser 7 mockDb)
-        `shouldBe` (Just mockUser, [[DeleteUser 7]])
-    it "should attempt to delete a non-existing user, and return nothing" $ do
-      runTest (deleteUser nonExistingId mockDb)
-        `shouldBe` (Nothing, [[DeleteUser nonExistingId]])
 
 data UserDbAction = CreateTable
                   | ListUsers
                   | CreateUser NewUser
                   | GetUser Integer
-                  | DeleteUser Integer
                   deriving (Eq, Show)
 
 mockDb :: MockDb UserDbAction
@@ -48,7 +40,6 @@ instance Db.User.UserDb (DbActions UserDbAction) where
   listUsers = DbActions [ListUsers] [mockUser]
   getUser idParam = DbActions [GetUser idParam] $ getMockUser idParam
   createUser newUser = DbActions [CreateUser newUser] mockUser
-  deleteUser idParam = DbActions [DeleteUser idParam] $ getMockUser idParam
 
 nonExistingId :: Integer
 nonExistingId = 99

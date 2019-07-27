@@ -22,8 +22,6 @@ prepareDb env = do
     let t = getVal @"transactor" env
     transact t $ do
       Db.User.initDB
-      users <- Db.User.listUsers
-      mapM_ (Db.User.deleteUser . userId) users
       Db.User.createUser user1
       Db.User.createUser user2
     return ()

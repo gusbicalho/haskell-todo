@@ -16,7 +16,6 @@ import qualified ServantTest.Adapters.User as A.User
 type API = Get '[JSON] Wire.User.ManyUsers
       :<|> ReqBody '[JSON] Wire.User.NewUserInput :> Post '[JSON] Wire.User.SingleUser
       :<|> Capture "userid" Integer :> Get '[JSON] Wire.User.SingleUser
-      :<|> Capture "userid" Integer :> Delete '[JSON] Wire.User.SingleUser
 
 api :: Proxy API
 api = Proxy
@@ -30,7 +29,6 @@ server :: ServerConstraints m => ServerT API m
 server = listUsers
     :<|> createUser
     :<|> getUser
-    :<|> deleteUser
   where -- Handlers
     listUsers = do
       env <- ask
@@ -45,14 +43,6 @@ server = listUsers
     getUser idParam = do
         env <- ask
         maybeUser <- C.User.getUser idParam env
-        result maybeUser
-      where
-        result Nothing  = throwError err404
-        result (Just x) = return $ A.User.singleWire x
-
-    deleteUser idParam = do
-        env <- ask
-        maybeUser <- C.User.deleteUser idParam env
         result maybeUser
       where
         result Nothing  = throwError err404

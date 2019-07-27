@@ -21,8 +21,3 @@ createUser :: ControllerConstraints env t m stmt => NewUser -> env -> m User
 createUser newUser env = do
   let transactor = getVal @"transactor" env
   transact transactor $ Db.User.createUser newUser
-
-deleteUser :: ControllerConstraints env t m stmt => Integer -> env -> m (Maybe User)
-deleteUser idParam env = do
-  let transactor = getVal @"transactor" env
-  transact transactor $ Db.User.deleteUser idParam
