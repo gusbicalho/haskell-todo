@@ -104,3 +104,4 @@ tests:
     - aeson
     - mtl
     - text
+    - temporary

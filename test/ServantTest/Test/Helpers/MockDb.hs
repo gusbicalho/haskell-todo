@@ -1,4 +1,4 @@
-module ServantTest.Test.Helpers where
+module ServantTest.Test.Helpers.MockDb where
 
 import Control.Monad.Writer
 import Common.HasVal.Class

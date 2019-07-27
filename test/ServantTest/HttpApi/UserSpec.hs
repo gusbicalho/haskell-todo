@@ -9,20 +9,19 @@ import Servant
 import Control.Monad.Reader
 
 import qualified ServantTest.Env as Env
-import qualified ServantTest.Config as Config
 import Common.HasVal.Class
 import ServantTest.Db.Transactor (Transactor(..))
 import qualified ServantTest.Db.User as Db.User
 import ServantTest.Models.User
 import ServantTest.HttpApi.User (api, server)
 
-dbfile :: FilePath
-dbfile = ".tempdbs_usertest.db"
+import ServantTest.Test.Helpers.TestEnv
 
 prepareDb :: Env.Env -> IO ()
 prepareDb env = do
     let t = getVal @"transactor" env
     transact t $ do
+      Db.User.initDB
       users <- Db.User.listUsers
       mapM_ (Db.User.deleteUser . userId) users
       Db.User.createUser user1
@@ -35,21 +34,16 @@ prepareDb env = do
                         , newPassword = "swordfish"
                         }
 
-app :: IO Application
-app = do
-  env <- Env.buildEnv config
-  prepareDb env
-  let hoisted = hoistServer api (provideDependencies env) server
-  return $ serve api hoisted
-  where provideDependencies env m = runReaderT m env
-        config = Config.Config {
-          Config.port = 8080
-        , Config.version = "testversion"
-        , Config.sqliteFile = dbfile
-        }
+testApp :: (Env.Env -> IO ()) -> IO Application
+testApp prepare = do
+    env <- testEnv prepare
+    let hoisted = hoistServer api (provideDependencies env) server
+    return $ serve api hoisted
+  where
+    provideDependencies env m = runReaderT m env
 
 spec :: Spec
-spec = with app $ do
+spec = beforeAll (testApp prepareDb) $ do
   describe "GET /" $ do
     it "responds with 200" $ do
       get "/" `shouldRespondWith` 200

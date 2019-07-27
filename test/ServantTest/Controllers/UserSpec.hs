@@ -4,7 +4,7 @@ module ServantTest.Controllers.UserSpec (spec) where
 
 import Test.Hspec
 
-import ServantTest.Test.Helpers
+import ServantTest.Test.Helpers.MockDb
 import qualified ServantTest.Db.User as Db.User
 import ServantTest.Controllers.User
 import ServantTest.Models.User
