@@ -29,7 +29,7 @@ newtype ManyUsers = ManyUsers { users :: [User] } deriving (Eq, Show)
 $(deriveJSON defaultOptions ''ManyUsers)
 
 data NewUserInput = NewUserInput {
-  input_email :: T.Text
+  input_login :: T.Text
 , input_password :: T.Text
 } deriving (Eq, Show)
 $(deriveJSON defaultOptions { fieldLabelModifier = dropPrefix_ } ''NewUserInput)

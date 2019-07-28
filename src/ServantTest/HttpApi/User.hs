@@ -32,6 +32,10 @@ authenticatedAsUser userIdParam (Authenticated AT.AuthTokenClaims { AT.identity 
   = userId == userIdParam
 authenticatedAsUser _ _ = False
 
+authenticated :: AuthResult AT.AuthTokenClaims -> Bool
+authenticated (Authenticated _) = True
+authenticated _                 = False
+
 server :: ServerConstraints m => AuthResult AT.AuthTokenClaims -> ServerT API m
 server auth = listUsers
          :<|> createUser
@@ -42,10 +46,12 @@ server auth = listUsers
       users <- C.User.listUsers env
       return $ A.User.manyWire users
 
-    createUser newUserInput = do
-      env <- ask
-      user <- C.User.createUser (A.User.inputToNewUser newUserInput) env
-      return $ A.User.singleWire user
+    createUser newUserInput
+      | authenticated auth = throwError err403
+      | otherwise = do
+          env <- ask
+          user <- C.User.createUser (A.User.inputToNewUser newUserInput) env
+          return $ A.User.singleWire user
 
     getUser idParam
       | not $ authenticatedAsUser idParam auth = throwError err403

@@ -1,8 +1,11 @@
+{-# LANGUAGE QuasiQuotes #-}
+
 {- HLINT ignore "Redundant do" -}
 module ServantTest.HttpApi.UserSpec (spec) where
 
 import Test.Hspec hiding (pendingWith)
 import Test.Hspec.Wai
+import Test.Hspec.Wai.JSON
 
 import Network.Wai
 import Servant
@@ -17,6 +20,7 @@ import qualified ServantTest.Db.User as Db.User
 import ServantTest.Models.User
 import ServantTest.HttpApi.User (api, server)
 
+import ServantTest.Test.Helpers.Wai
 import ServantTest.Test.Helpers.TestEnv
 
 prepareDb :: Env.Env -> IO ()
@@ -50,8 +54,9 @@ spec = do
       it "responds with 200" $ do
         get "/" `shouldRespondWith` 200
       it "responds with [User]" $ do
-        let users = "{\"users\":[{\"id\":1,\"login\":\"isaac@newton.com\"},{\"id\":2,\"login\":\"albert@einstein.com\"}]}"
-        get "/" `shouldRespondWith` users
+        get "/" `shouldRespondWith` [json|{users: [{id: 1, login: "isaac@newton.com"}
+                                                  ,{id: 2, login: "albert@einstein.com"}]}
+                                         |]
   describe "GET /:id" $ do
     before (app (loginAs "albert@einstein.com" "swordfish")) $ do
       describe "authenticated as a user" $ do
@@ -60,9 +65,18 @@ spec = do
           it "responds with 200" $ do
             userRequest `shouldRespondWith` 200
           it "responds with User" $ do
-            let user = "{\"user\":{\"id\":2,\"login\":\"albert@einstein.com\"}}"
-            userRequest `shouldRespondWith` user
+            userRequest `shouldRespondWith` [json|{user: {id: 2, login: "albert@einstein.com"}}|]
         describe "get a different user" $ do
           let userRequest = get "/99"
           it "responds with 403" $ do
             userRequest `shouldRespondWith` 403
+  describe "POST /" $ do
+    before (app (loginAs "albert@einstein.com" "swordfish")) $ do
+      describe "as an authenticated user" $ do
+        it "responds with 403" $ do
+          postJson "/" [json|{login: "gust", password: "pass123"}|] `shouldRespondWith` 403
+    before (app unauthenticated) $ do
+      describe "unauthenticated" $ do
+        it "responds with a new user" $ do
+          postJson "/" [json|{login: "gust", password: "pass123"}|]
+            `shouldRespondWith` [json|{user: {id: 3, login: "gust"}}|]

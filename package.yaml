@@ -106,6 +106,7 @@ tests:
     - hspec-wai
     - hspec-wai-json
     - wai
+    - wai-extra
     - warp
     - servant-server
     - servant-auth
