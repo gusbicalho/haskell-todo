@@ -7,15 +7,6 @@ import Data.Aeson.TH
 import qualified Data.Text as T
 import Common.Util.AesonHelpers
 
-data SortBy = Age | Name
-instance FromHttpApiData SortBy where
-  parseQueryParam text = case text of
-    "age"  -> return Age
-    "Age"  -> return Age
-    "name" -> return Name
-    "Name" -> return Name
-    _ -> fail "Invalid SortBy param"
-
 data User = User {
   user_id :: Integer
 , user_login :: T.Text

@@ -1,4 +1,3 @@
-{-# LANGUAGE DuplicateRecordFields #-}
 module ServantTest.Models.User
   ( User (..)
   , NewUser (..)

@@ -1,8 +1,8 @@
 module ServantTest.Controllers.User where
 
 import Common.HasVal.Class
-import ServantTest.Models.User (User(..), NewUser(..))
 import ServantTest.Db.Transactor (Transactor(..))
+import ServantTest.Models.User (User(..), NewUser(..))
 import ServantTest.Db.User as Db.User
 
 type ControllerConstraints env t m stmt = (HasVal "transactor" t env, Transactor t m stmt, UserDb stmt)

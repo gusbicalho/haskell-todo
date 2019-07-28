@@ -14,10 +14,16 @@ import qualified ServantTest.Env as Env
 import qualified ServantTest.WireTypes.User as Wire.User
 import qualified ServantTest.Controllers.User as C.User
 import qualified ServantTest.Adapters.User as A.User
+import qualified ServantTest.WireTypes.Item as Wire.Item
+import qualified ServantTest.Controllers.Item as C.Item
+import qualified ServantTest.Adapters.Item as A.Item
 
 type API = Get '[JSON] Wire.User.ManyUsers
       :<|> ReqBody '[JSON] Wire.User.NewUserInput :> Post '[JSON] Wire.User.SingleUser
       :<|> Capture "userid" Integer :> Get '[JSON] Wire.User.SingleUser
+      :<|> Capture "userid" Integer :> "items" :> (
+        Get '[JSON] Wire.Item.ManyItems
+      )
 
 api :: Proxy API
 api = Proxy
@@ -40,6 +46,7 @@ server :: ServerConstraints m => AuthResult AT.AuthTokenClaims -> ServerT API m
 server auth = listUsers
          :<|> createUser
          :<|> getUser
+         :<|> userItems
   where -- Handlers
     listUsers = do
       env <- ask
@@ -62,3 +69,12 @@ server auth = listUsers
         where
           result Nothing  = throwError err404
           result (Just x) = return $ A.User.singleWire x
+
+    userItems userIdParam
+      | not $ authenticatedAsUser userIdParam auth = throwError err403
+      | otherwise = getItems
+        where
+          getItems = do
+            env <- ask
+            items <- C.Item.findItemsByUserId userIdParam env
+            return $ A.Item.manyWire items

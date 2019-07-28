@@ -8,6 +8,7 @@ import ServantTest.Config (Config(..))
 import ServantTest.Db.Transactor (Transactor (..))
 import ServantTest.Db.SQLite (SqliteDb, sqliteDb)
 import qualified ServantTest.Db.User as Db.User
+import qualified ServantTest.Db.Item as Db.Item
 
 data Env = Env {
   config :: Config
@@ -36,6 +37,7 @@ buildEnv config = do
       sqlite = sqliteDb dbfile
   jwtKey <- readKey $ jwtKeyPath config
   transact sqlite Db.User.initDB
+  transact sqlite Db.Item.initDB
   return Env {
     config
   , sqlite

@@ -19,6 +19,13 @@ import ServantTest.Models.User ( User(..)
                                , passwordToText
                                )
 
+class UserDb action where
+  initDB :: action ()
+  listUsers :: action [User]
+  getUser :: Integer -> action (Maybe User)
+  createUser :: M.User.NewUser -> action User
+  findUserByLogin :: M.User.Login -> action (Maybe User)
+
 newtype DbUser = DbUser { dbToUser :: User }
 instance FromRow DbUser where
   fromRow = DbUser <$> user
@@ -32,13 +39,6 @@ instance ToRow DbNewUser where
   toRow (DbNewUser NewUser {..}) = toRow ( loginToText newLogin
                                          , passwordToText newPassword
                                          )
-
-class UserDb action where
-  initDB :: action ()
-  listUsers :: action [User]
-  getUser :: Integer -> action (Maybe User)
-  createUser :: M.User.NewUser -> action User
-  findUserByLogin :: M.User.Login -> action (Maybe User)
 
 instance UserDb SQLiteAction where
   initDB :: SQLiteAction ()
@@ -72,9 +72,9 @@ getUser' rowId conn = do
 
 createUser' :: M.User.NewUser -> Connection -> IO User
 createUser' newUser conn = do
-    execute conn "INSERT INTO users (login, password) values (?, ?)" (DbNewUser newUser)
-    rowId <- lastInsertRowId conn
-    fromJust <$> getUser' (fromIntegral rowId) conn
+  execute conn "INSERT INTO users (login, password) values (?, ?)" (DbNewUser newUser)
+  rowId <- lastInsertRowId conn
+  fromJust <$> getUser' (fromIntegral rowId) conn
 
 findUserByLogin' :: Login -> Connection -> IO (Maybe User)
 findUserByLogin' login conn = do
