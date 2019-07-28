@@ -4,7 +4,7 @@ import Servant.Auth.Server
 import Crypto.JOSE (JWK)
 import Network.Wai.Handler.Warp (Port)
 import Common.Version.Class (HasVal(..), Version)
-import ServantTest.Config (Config(..), getSecret)
+import ServantTest.Config (Config(..))
 import ServantTest.Db.Transactor (Transactor (..))
 import ServantTest.Db.SQLite (SqliteDb, sqliteDb)
 import qualified ServantTest.Db.User as Db.User
@@ -34,7 +34,7 @@ buildEnv :: Config -> IO Env
 buildEnv config = do
   let dbfile = sqliteFile config
       sqlite = sqliteDb dbfile
-      jwtKey = fromSecret . getSecret . jwtSecret $ config
+  jwtKey <- readKey $ jwtKeyPath config
   transact sqlite Db.User.initDB
   return Env {
     config

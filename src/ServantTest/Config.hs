@@ -16,18 +16,10 @@ import qualified Common.Config.Server as CS
 import qualified Common.Config.Loader as CL
 import Common.Version.Class (HasVal(..), Version, fromText)
 
-newtype JWTSecret = JWTSecret { getSecret :: B8.ByteString } deriving (Eq, Show)
-instance FromJSON JWTSecret where
-  parseJSON v = JWTSecret . B8.pack <$> parseJSON v
-instance ToJSON JWTSecret where
-  toJSON _ = toJSON $ String "REDACTED"
-instance IsString JWTSecret where
-  fromString = JWTSecret . fromString
-
 data Config = Config { port :: Port
                      , version :: T.Text
                      , sqliteFile :: FilePath
-                     , jwtSecret :: JWTSecret
+                     , jwtKeyPath :: FilePath
                      }
   deriving (Eq, Show)
 
