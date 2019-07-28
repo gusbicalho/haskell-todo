@@ -8,8 +8,6 @@ import Data.Proxy
 import Network.Wai.Handler.Warp (Port)
 import Servant
 import Control.Monad.Reader
-import Data.String (IsString(..))
-import qualified Data.ByteString.Char8 as B8
 import qualified Data.Text as T
 
 import qualified Common.Config.Server as CS

@@ -48,5 +48,5 @@ type API = "user" :> Auth '[JWT, SA.BasicAuth] AT.AuthTokenClaims :> Put '[JSON]
 server :: forall m. MonadError ServantErr m => ServerT API m
 server = loginUser
   where -- Handlers
-    loginUser (Authenticated auth) = return ()
+    loginUser (Authenticated _) = return ()
     loginUser _                 = throwError err401
