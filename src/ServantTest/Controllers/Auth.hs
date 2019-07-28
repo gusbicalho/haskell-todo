@@ -1,7 +1,6 @@
 module ServantTest.Controllers.Auth where
 
 import Control.Monad
-import Servant
 import Common.HasVal.Class
 
 import ServantTest.Models.User

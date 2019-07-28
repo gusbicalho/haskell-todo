@@ -8,6 +8,8 @@ module ServantTest.HttpApi.User
 import Control.Monad.Except
 import Control.Monad.Reader
 import Servant
+import Servant.Auth.Server
+import qualified Common.Auth.Types as AT
 import qualified ServantTest.Env as Env
 import qualified ServantTest.WireTypes.User as Wire.User
 import qualified ServantTest.Controllers.User as C.User
@@ -25,10 +27,15 @@ type ServerConstraints m = ( MonadError ServantErr m
                            , MonadReader Env.Env m
                            )
 
-server :: ServerConstraints m => ServerT API m
-server = listUsers
-    :<|> createUser
-    :<|> getUser
+authenticatedAsUser :: Integer -> AuthResult AT.AuthTokenClaims -> Bool
+authenticatedAsUser userIdParam (Authenticated AT.AuthTokenClaims { AT.identity = AT.Known AT.User { AT.userId }})
+  = userId == userIdParam
+authenticatedAsUser _ _ = False
+
+server :: ServerConstraints m => AuthResult AT.AuthTokenClaims -> ServerT API m
+server auth = listUsers
+         :<|> createUser
+         :<|> getUser
   where -- Handlers
     listUsers = do
       env <- ask
@@ -40,10 +47,12 @@ server = listUsers
       user <- C.User.createUser (A.User.inputToNewUser newUserInput) env
       return $ A.User.singleWire user
 
-    getUser idParam = do
-        env <- ask
-        maybeUser <- C.User.getUser idParam env
-        result maybeUser
-      where
-        result Nothing  = throwError err404
-        result (Just x) = return $ A.User.singleWire x
+    getUser idParam
+      | not $ authenticatedAsUser idParam auth = throwError err403
+      | otherwise = do
+          env <- ask
+          maybeUser <- C.User.getUser idParam env
+          result maybeUser
+        where
+          result Nothing  = throwError err404
+          result (Just x) = return $ A.User.singleWire x

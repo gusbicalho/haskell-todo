@@ -100,11 +100,16 @@ tests:
     dependencies:
     - base
     - servant-test
+    - http-client
+    - http-types
     - hspec
     - hspec-wai
     - hspec-wai-json
     - wai
+    - warp
     - servant-server
+    - servant-auth
+    - servant-auth-server
     - aeson
     - mtl
     - text

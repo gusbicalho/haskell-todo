@@ -40,6 +40,7 @@ instance Db.User.UserDb (DbActions UserDbAction) where
   listUsers = DbActions [ListUsers] [mockUser]
   getUser idParam = DbActions [GetUser idParam] $ getMockUser idParam
   createUser newUser = DbActions [CreateUser newUser] mockUser
+  findUserByLogin = undefined
 
 nonExistingId :: Integer
 nonExistingId = 99

@@ -1,17 +1,22 @@
-module ServantTest.HttpApi.Auth where
-  -- ( api
-  -- , server
-  -- , API
-  -- , ServerConstraints
-  -- )
-  -- where
+module ServantTest.HttpApi.Auth
+  ( API
+  , APIContext
+  , server
+  , apiContext
+  , JWTAuth
+  , JWTContext
+  , jwtContext
+  , JWTContextConstraints
+  , basicAuthUser
+  ) where
 
 import Control.Monad.Except
 import Servant
 import Servant.Auth as SA
 import Servant.Auth.Server as SAS
 import qualified Common.Auth.Types as AT
-import Common.HasVal.Class
+import Common.Auth.JWTContext (JWTContext, JWTContextConstraints, jwtContext)
+import Common.Util.ServantHelpers ((.:.), type (++))
 import qualified ServantTest.Env as Env
 import ServantTest.Models.User
 import ServantTest.Adapters.Auth
@@ -28,26 +33,17 @@ basicAuthUser env basicAuthData = do
       }
     }
 
-type instance BasicAuthCfg = BasicAuthData -> IO (AuthResult AT.AuthTokenClaims)
+type APIContext = JWTContext
+              ++ '[BasicAuthData -> IO (AuthResult AT.AuthTokenClaims)]
 
-instance FromBasicAuthData AT.AuthTokenClaims where
-  fromBasicAuthData authData authCheckFunction = authCheckFunction authData
-
-type APIContext = '[ JWTSettings
-                   , CookieSettings
-                   , BasicAuthData -> IO (AuthResult AT.AuthTokenClaims)
-                   ]
+type JWTAuth = Auth '[JWT] AT.AuthTokenClaims
 
 apiContext :: Env.Env -> Context APIContext
-apiContext env = defaultJWTSettings (getVal @"jwtKey" env)
-              :. defaultCookieSettings
-              :. basicAuthUser env
+apiContext env = jwtContext env
+             .:. basicAuthUser env
               :. EmptyContext
 
 type API = "user" :> Auth '[JWT, SA.BasicAuth] AT.AuthTokenClaims :> Put '[JSON] ()
-
-api :: Proxy API
-api = Proxy
 
 server :: forall m. MonadError ServantErr m => ServerT API m
 server = loginUser

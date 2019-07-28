@@ -32,7 +32,9 @@ type ApplicationAPI =
     :<|>
     "auth" :> Auth.API
     :<|>
-    "users" :> User.API
+    Auth.JWTAuth :> (
+      "users" :> User.API
+    )
   )
 
 type ApplicationServerConstraints m a =
@@ -58,7 +60,8 @@ type ServerConstraints m a =
 api :: Proxy API
 api = Proxy
 
-apiContext env = Auth.apiContext env
+apiContext :: Env.Env -> Context APIContext
+apiContext = Auth.apiContext
 
 server :: forall m a. ServerConstraints m a => ServerT API m
 server = opsServer

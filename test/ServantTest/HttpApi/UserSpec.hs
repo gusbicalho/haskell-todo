@@ -6,9 +6,11 @@ import Test.Hspec.Wai
 
 import Network.Wai
 import Servant
+import Servant.Auth.Server as SAS
 import Control.Monad.Reader
 
 import qualified ServantTest.Env as Env
+import Common.Auth.Types as AT
 import Common.HasVal.Class
 import ServantTest.Db.Transactor (Transactor(..))
 import qualified ServantTest.Db.User as Db.User
@@ -32,37 +34,35 @@ prepareDb env = do
                         , newPassword = "swordfish"
                         }
 
-app :: IO Application
-app = do
-    env <- testEnv prepareDb
-    let hoisted = hoistServer api (provideDependencies env) server
+app :: (Env.Env -> IO (AuthResult AT.AuthTokenClaims)) -> IO Application
+app authenticate = do
+    env <- testEnv id prepareDb
+    auth <- authenticate env
+    let hoisted = hoistServer api (provideDependencies env) (server auth)
     return $ serve api hoisted
   where
     provideDependencies env m = runReaderT m env
 
 spec :: Spec
-spec = beforeAll app $ do
+spec = do
   describe "GET /" $ do
-    it "responds with 200" $ do
-      get "/" `shouldRespondWith` 200
-    it "responds with [User]" $ do
-      let users = "{\"users\":[{\"id\":1,\"login\":\"isaac@newton.com\"},{\"id\":2,\"login\":\"albert@einstein.com\"}]}"
-      get "/" `shouldRespondWith` users
-  describe "GET /:id" $ do
-    describe "for a known id" $ do
-      let userRequest = get "/2"
+    before (app unauthenticated) $ do
       it "responds with 200" $ do
-        userRequest `shouldRespondWith` 200
-      it "responds with User" $ do
-        let user = "{\"user\":{\"id\":2,\"login\":\"albert@einstein.com\"}}"
-        userRequest `shouldRespondWith` user
-    describe "for an unknown id" $ do
-      let userRequest = get "/99"
-      it "responds with 404" $ do
-        userRequest `shouldRespondWith` 404
-  describe "POST /" $ do
-    it "should be tested" $ do
-      pendingWith "TODO"
-  describe "DELETE /:id" $ do
-    it "should be tested" $ do
-      pendingWith "TODO"
+        get "/" `shouldRespondWith` 200
+      it "responds with [User]" $ do
+        let users = "{\"users\":[{\"id\":1,\"login\":\"isaac@newton.com\"},{\"id\":2,\"login\":\"albert@einstein.com\"}]}"
+        get "/" `shouldRespondWith` users
+  describe "GET /:id" $ do
+    before (app (loginAs "albert@einstein.com" "swordfish")) $ do
+      describe "authenticated as a user" $ do
+        describe "get the user" $ do
+          let userRequest = get "/2"
+          it "responds with 200" $ do
+            userRequest `shouldRespondWith` 200
+          it "responds with User" $ do
+            let user = "{\"user\":{\"id\":2,\"login\":\"albert@einstein.com\"}}"
+            userRequest `shouldRespondWith` user
+        describe "get a different user" $ do
+          let userRequest = get "/99"
+          it "responds with 403" $ do
+            userRequest `shouldRespondWith` 403

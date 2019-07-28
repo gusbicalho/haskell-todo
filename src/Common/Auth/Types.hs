@@ -42,3 +42,8 @@ data AuthTokenClaims = AuthTokenClaims {
 $(deriveJSON defaultOptions ''AuthTokenClaims)
 instance ToJWT AuthTokenClaims
 instance FromJWT AuthTokenClaims
+
+type instance BasicAuthCfg = BasicAuthData -> IO (AuthResult AuthTokenClaims)
+
+instance FromBasicAuthData AuthTokenClaims where
+  fromBasicAuthData authData authCheckFunction = authCheckFunction authData
