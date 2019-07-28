@@ -13,6 +13,7 @@ import qualified ServantTest.Env as Env
 import qualified Common.Version.Server as Version
 import qualified ServantTest.HttpApi.Auth as Auth
 import qualified ServantTest.HttpApi.User as User
+import qualified ServantTest.HttpApi.Item as Item
 
 type OpsAPI =
   "ops" :> (
@@ -33,19 +34,24 @@ type ApplicationAPI =
     "auth" :> Auth.API
     :<|>
     Auth.JWTAuth :> (
-      "users" :> User.API
+           "users" :> User.API
+      :<|> "items" :> Item.API
     )
   )
 
 type ApplicationServerConstraints m a =
   ( Version.ServerConstraints m a
   , User.ServerConstraints m
+  , Item.ServerConstraints m
   )
 
 applicationServer :: ApplicationServerConstraints m a => ServerT ApplicationAPI m
 applicationServer = Version.server
                :<|> Auth.server
-               :<|> User.server
+               :<|> \auth -> (
+                      User.server auth
+                 :<|> Item.server auth
+               )
 
 type APIContext = Auth.APIContext
 

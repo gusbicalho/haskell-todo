@@ -58,6 +58,7 @@ default-extensions:
   - TypeFamilies
   - TypeFamilyDependencies
   - TypeOperators
+  - ViewPatterns
 
 library:
   source-dirs: src

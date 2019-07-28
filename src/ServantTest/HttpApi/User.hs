@@ -10,6 +10,7 @@ import Control.Monad.Reader
 import Servant
 import Servant.Auth.Server
 import qualified Common.Auth.Types as AT
+import qualified Common.Auth.Logic as Auth.Logic
 import qualified ServantTest.Env as Env
 import qualified ServantTest.WireTypes.User as Wire.User
 import qualified ServantTest.Controllers.User as C.User
@@ -33,15 +34,6 @@ type ServerConstraints m = ( MonadError ServantErr m
                            , MonadReader Env.Env m
                            )
 
-authenticatedAsUser :: Integer -> AuthResult AT.AuthTokenClaims -> Bool
-authenticatedAsUser userIdParam (Authenticated AT.AuthTokenClaims { AT.identity = AT.Known AT.User { AT.userId }})
-  = userId == userIdParam
-authenticatedAsUser _ _ = False
-
-authenticated :: AuthResult AT.AuthTokenClaims -> Bool
-authenticated (Authenticated _) = True
-authenticated _                 = False
-
 server :: ServerConstraints m => AuthResult AT.AuthTokenClaims -> ServerT API m
 server auth = listUsers
          :<|> createUser
@@ -54,14 +46,14 @@ server auth = listUsers
       return $ A.User.manyWire users
 
     createUser newUserInput
-      | authenticated auth = throwError err403
+      | Auth.Logic.authenticated auth = throwError err403
       | otherwise = do
           env <- ask
           user <- C.User.createUser (A.User.inputToNewUser newUserInput) env
           return $ A.User.singleWire user
 
     getUser idParam
-      | not $ authenticatedAsUser idParam auth = throwError err403
+      | not $ Auth.Logic.authenticatedAsUser idParam auth = throwError err403
       | otherwise = do
           env <- ask
           maybeUser <- C.User.getUser idParam env
@@ -71,7 +63,7 @@ server auth = listUsers
           result (Just x) = return $ A.User.singleWire x
 
     userItems userIdParam
-      | not $ authenticatedAsUser userIdParam auth = throwError err403
+      | not $ Auth.Logic.authenticatedAsUser userIdParam auth = throwError err403
       | otherwise = getItems
         where
           getItems = do
