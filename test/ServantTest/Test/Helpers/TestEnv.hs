@@ -28,6 +28,7 @@ testEnv transEnv prepare = do
       Config.port = 8080
     , Config.version = "testversion"
     , Config.sqliteFile = sqliteFile
+    , Config.jwtSecret = "a secret"
     }
 
 testEnvApp :: (Env.Env -> Env.Env) -> (Env.Env -> IO ()) -> IO (Env.Env, Application)
