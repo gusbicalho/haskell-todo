@@ -11,6 +11,7 @@ import Servant
 import qualified ServantTest.Config as Config
 import qualified ServantTest.Env as Env
 import qualified Common.Version.Server as Version
+import qualified ServantTest.HttpApi.Static as Static
 import qualified ServantTest.HttpApi.Auth as Auth
 import qualified ServantTest.HttpApi.User as User
 import qualified ServantTest.HttpApi.Item as Item
@@ -57,6 +58,7 @@ type APIContext = Auth.APIContext
 
 type API = OpsAPI
       :<|> ApplicationAPI
+      :<|> Static.API
 
 type ServerConstraints m a =
   ( OpsServerConstraints m a
@@ -72,6 +74,7 @@ apiContext = Auth.apiContext
 server :: forall m a. ServerConstraints m a => ServerT API m
 server = opsServer
     :<|> applicationServer
+    :<|> Static.server
 
 app :: forall m a . ServerConstraints m a => Env.Env -> (forall x. m x -> Handler x) -> Application
 app env provideDependencies =

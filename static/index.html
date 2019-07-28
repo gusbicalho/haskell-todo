@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+  <head><title>Haskell TODO</title></head>
+  <body>
+    <h1>TODO</h1>
+    <form id="login-form">
+      User: <input name="login" type="text" /><br/>
+      Password: <input name="password" type="password" /><br/>
+      <input type="submit" value="Login!" />
+    </form>
+
+    <script>
+      let loginForm = document.querySelector("#login-form")
+      loginForm.onsubmit = onSubmit
+
+      function onSubmit(event) {
+        console.log(event)
+        let loginForm = event.target
+        let login = loginForm.login.value
+        let password = loginForm.password.value
+        let headers = new Headers()
+        headers.set('Authorization', 'Basic ' + btoa(login + ":" + password))
+        fetch('/api/auth/user', {
+          method: 'put',
+          headers
+        }).then(
+          (response) => response.json()
+        ).then((body) => {
+          console.log(body)
+        }).catch((error) => {
+          console.error(error)
+        })
+        return false
+      }
+    </script>
+  </body>
+</html>
