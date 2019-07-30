@@ -1,9 +1,9 @@
 module ServantTest.HttpApi.Auth
-  ( API
+  ( AuthenticationAPI
   , APIContext
   , server
   , apiContext
-  , JWTAuth
+  , AuthenticatedAPI
   , JWTContext
   , jwtContext
   , JWTContextConstraints
@@ -36,16 +36,16 @@ basicAuthUser env basicAuthData = do
 type APIContext = JWTContext
               ++ '[BasicAuthData -> IO (AuthResult AT.AuthTokenClaims)]
 
-type JWTAuth = Auth '[JWT] AT.AuthTokenClaims
+type AuthenticatedAPI api = Auth '[JWT] AT.AuthTokenClaims :> api
 
 apiContext :: Env.Env -> Context APIContext
 apiContext env = jwtContext env
              .:. basicAuthUser env
               :. EmptyContext
 
-type API = "user" :> Auth '[JWT, SA.BasicAuth] AT.AuthTokenClaims :> Put '[JSON] ()
+type AuthenticationAPI = "user" :> Auth '[JWT, SA.BasicAuth] AT.AuthTokenClaims :> Put '[JSON] ()
 
-server :: forall m. MonadError ServantErr m => ServerT API m
+server :: forall m. MonadError ServantErr m => ServerT AuthenticationAPI m
 server = loginUser
   where -- Handlers
     loginUser (Authenticated _) = return ()

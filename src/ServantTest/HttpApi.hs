@@ -16,65 +16,54 @@ import qualified ServantTest.HttpApi.Auth as Auth
 import qualified ServantTest.HttpApi.User as User
 import qualified ServantTest.HttpApi.Item as Item
 
-type OpsAPI =
-  "ops" :> (
-    "config" :> Config.API
-  )
-
-type OpsServerConstraints m a =
+type ServerConstraints m a =
   ( Config.ServerConstraints m a
-  )
-
-opsServer :: forall m a. OpsServerConstraints m a => ServerT OpsAPI m
-opsServer = Config.server
-
-type ApplicationAPI =
-  "api" :> (
-    "version" :> Version.API
-    :<|>
-    "auth" :> Auth.API
-    :<|>
-    Auth.JWTAuth :> (
-           "users" :> User.API
-      :<|> "items" :> Item.API
-    )
-  )
-
-type ApplicationServerConstraints m a =
-  ( Version.ServerConstraints m a
+  , Version.ServerConstraints m a
   , User.ServerConstraints m
   , Item.ServerConstraints m
   )
 
-applicationServer :: ApplicationServerConstraints m a => ServerT ApplicationAPI m
-applicationServer = Version.server
-               :<|> Auth.server
-               :<|> \auth -> (
-                      User.server auth
-                 :<|> Item.server auth
-               )
+type API =
+  "ops" :> (
+    "config" :> Config.API
+  )
+  :<|>
+  "api" :> (
+    "version" :> Version.API
+    :<|>
+    "auth" :> Auth.AuthenticationAPI
+    :<|>
+    Auth.AuthenticatedAPI (
+           "users" :> User.API
+      :<|> "items" :> Item.API
+    )
+  )
+  :<|>
+  Static.API
+
+server :: ServerConstraints m a => ServerT API m
+server =
+  ( -- /ops
+    Config.server
+  )
+  :<|> ( -- /api
+         Version.server
+    :<|> Auth.server
+    :<|> \auth -> (
+           User.server auth
+      :<|> Item.server auth
+    )
+  )
+  :<|> -- static files
+  Static.server
 
 type APIContext = Auth.APIContext
-
-type API = OpsAPI
-      :<|> ApplicationAPI
-      :<|> Static.API
-
-type ServerConstraints m a =
-  ( OpsServerConstraints m a
-  , ApplicationServerConstraints m a
-  )
 
 api :: Proxy API
 api = Proxy
 
 apiContext :: Env.Env -> Context APIContext
 apiContext = Auth.apiContext
-
-server :: forall m a. ServerConstraints m a => ServerT API m
-server = opsServer
-    :<|> applicationServer
-    :<|> Static.server
 
 app :: forall m a . ServerConstraints m a => Env.Env -> (forall x. m x -> Handler x) -> Application
 app env provideDependencies =
