@@ -8,10 +8,21 @@
       Password: <input name="password" type="password" /><br/>
       <input type="submit" value="Login!" />
     </form>
+    <div>
+      <h2>To-dos for user <span id="user-login"></span> </h2>
+    </div>
 
     <script>
       let loginForm = document.querySelector("#login-form")
       loginForm.onsubmit = onSubmit
+
+      let loggedInUser = null;
+      async function loggedInUserUpdated(transform) {
+        loggedInUser = transform(loggedInUser)
+        titleUserLogin = document.querySelector("#user-login")
+        titleUserLogin.innerHTML = loggedInUser.login
+        return loggedInUser
+      }
 
       function onSubmit(event) {
         console.log(event)
@@ -21,16 +32,27 @@
         let headers = new Headers()
         headers.set('Authorization', 'Basic ' + btoa(login + ":" + password))
         fetch('/api/auth/user', {
-          method: 'put',
-          headers
-        }).then(
-          (response) => response.json()
-        ).then((body) => {
-          console.log(body)
-        }).catch((error) => {
-          console.error(error)
+          method: 'post',
+          headers,
+          credentials: 'same-origin',
+        }).then((response) =>
+          response.status === 200
+            ? response.json()
+            : { error: response.statusText }
+        ).then((result) => {
+          if (result.error) {
+            alert(result.error)
+            return;
+          }
+          loginSuccessful(result.userId)
         })
         return false
+      }
+
+      async function loginSuccessful(userId) {
+        let user = await loggedInUserUpdated(() => ({ id: userId }))
+        let userDetail = await fetch(`/api/users/${user.id}`, { credentials: 'include' })
+        console.log(userDetail)
       }
     </script>
   </body>

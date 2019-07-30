@@ -13,7 +13,7 @@ import qualified ServantTest.Db.Item as Db.Item
 data Env = Env {
   config :: Config
 , sqlite :: SqliteDb
-, jwtKey :: JWK
+, jwtSettings :: JWTSettings
 }
 
 instance HasVal "transactor" SqliteDb Env where
@@ -25,8 +25,8 @@ instance HasVal "version" Version Env where
 instance HasVal "config" Config Env where
   getVal = config
 
-instance HasVal "jwtKey" JWK Env where
-  getVal = jwtKey
+instance HasVal "jwtSettings" JWTSettings Env where
+  getVal = jwtSettings
 
 instance HasVal "port" Port Env where
   getVal = port . config
@@ -36,10 +36,11 @@ buildEnv config = do
   let dbfile = sqliteFile config
       sqlite = sqliteDb dbfile
   jwtKey <- readKey $ jwtKeyPath config
+  let jwtSettings = defaultJWTSettings jwtKey
   transact sqlite Db.User.initDB
   transact sqlite Db.Item.initDB
   return Env {
     config
   , sqlite
-  , jwtKey
+  , jwtSettings
   }
