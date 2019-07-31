@@ -2,7 +2,6 @@
 
 module ServantTest.WireTypes.Item where
 
-import Servant
 import Data.Aeson.TH
 import qualified Data.Text as T
 import Common.Util.AesonHelpers

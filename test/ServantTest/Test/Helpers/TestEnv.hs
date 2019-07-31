@@ -29,12 +29,13 @@ testEnv transEnv prepare = do
     , Config.version = "testversion"
     , Config.sqliteFile = sqliteFile
     , Config.jwtKeyPath = "resources/test.key"
+    , Config.insecureAuthCookie = True
     }
 
 testEnvApp :: (Env.Env -> Env.Env) -> (Env.Env -> IO ()) -> IO (Env.Env, Application)
 testEnvApp transEnv prepare = do
     env <- testEnv transEnv prepare
-    return $ (env, HttpApi.app env (provideDependencies env))
+    return (env, HttpApi.app env (provideDependencies env))
   where
     provideDependencies env m = runReaderT m env
 

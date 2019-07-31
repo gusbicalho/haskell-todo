@@ -101,6 +101,7 @@ tests:
     dependencies:
     - base
     - servant-test
+    - bytestring
     - http-client
     - http-types
     - hspec

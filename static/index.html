@@ -24,6 +24,28 @@
         return loggedInUser
       }
 
+      function xsrfToken() {
+        let r = document.cookie.match(new RegExp('XSRF-TOKEN=([^;]+)'))
+        if (r) return r[1];
+      }
+
+      function whenLet(x, f) {
+        if (x) { return f(x) }
+        return null
+      }
+
+      function authFetch(target, options) {
+        let headers = options.headers || new Headers()
+        whenLet(xsrfToken(), token => {
+          headers.set('X-XSRF-TOKEN', token)
+        })
+        fetch(target, {
+          ...options,
+          headers,
+          credentials: 'same-origin',
+        })
+      }
+
       function onSubmit(event) {
         console.log(event)
         let loginForm = event.target
@@ -51,7 +73,7 @@
 
       async function loginSuccessful(userId) {
         let user = await loggedInUserUpdated(() => ({ id: userId }))
-        let userDetail = await fetch(`/api/users/${user.id}`, { credentials: 'include' })
+        let userDetail = await authFetch(`/api/users/${user.id}`, { credentials: 'include' })
         console.log(userDetail)
       }
     </script>
