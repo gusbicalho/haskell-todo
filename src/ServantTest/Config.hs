@@ -18,6 +18,7 @@ data Config = Config { port :: Port
                      , version :: T.Text
                      , sqliteFile :: FilePath
                      , jwtKeyPath :: FilePath
+                     , insecureAuthCookie :: Bool
                      }
   deriving (Eq, Show)
 

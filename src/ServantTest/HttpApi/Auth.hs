@@ -28,7 +28,7 @@ basicAuthUser env basicAuthData = do
     maybeUser <- checkUserLogin (basicAuthToLoginInput basicAuthData) env
     maybe (return SAS.Indefinite) (return . SAS.Authenticated . toToken) maybeUser
   where
-    toToken (User { userId }) = AT.AuthTokenClaims {
+    toToken User { userId } = AT.AuthTokenClaims {
       AT.identity = AT.Known $ AT.User {
         AT.userId = userId
       }
@@ -52,6 +52,5 @@ type AuthenticationAPI = "user" :> (
 server :: forall m. MonadError ServantErr m => ServerT AuthenticationAPI m
 server = loginUser :<|> loginUser
   where -- Handlers
-    loginUser (Authenticated result@(Auth.Logic.knownIdentity -> Just identity))
-      = return identity
+    loginUser (Authenticated (Auth.Logic.knownIdentity -> Just identity)) = return identity
     loginUser _ = throwError err401
