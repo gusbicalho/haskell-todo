@@ -10,22 +10,56 @@
     </form>
     <div>
       <h2>To-dos for user <span id="user-login"></span> </h2>
+      <ul id="todos"></ul>
     </div>
 
     <script>
       let loginForm = document.querySelector("#login-form")
       loginForm.onsubmit = onSubmit
 
-      let _loggedInUser = null;
-      async function updateUser(transform) {
-        _loggedInUser = transform(_loggedInUser)
-        whenLet(_loggedInUser.login, login => {
+      class Store {
+        constructor(val, watch) {
+          this._val = val
+          this._watch = watch
+        }
+        async update(transform) {
+          this._val = await transform(this._val)
+          await this._watch(this._val)
+          return this._val
+        }
+
+        async get() {
+          return await this.update(u => u)
+        }
+      }
+
+      let userStore = new Store(null, user => {
+        whenLet(user.login, login => {
           document.querySelector("#user-login").innerHTML = login
         })
-        return _loggedInUser
+        whenLet(user.items, items => {
+          const todos = document.querySelector("#todos")
+          todos.innerHTML = ""
+          for (item of items) {
+            const li = document.createElement("li")
+            li.append(makeItemView(item))
+            todos.appendChild(li)
+          }
+        })
+      })
+
+      const updateItemState = (item, div) => () => {
+        console.log(item)
       }
-      async function getUser() {
-        return await updateUser(u => u);
+
+      function makeItemView(item) {
+        const div = document.createElement("div")
+        const stateBtn = document.createElement("button")
+        stateBtn.onclick = updateItemState(item, div)
+        stateBtn.append(item.state)
+        div.appendChild(stateBtn)
+        div.append(item.title)
+        return div
       }
 
       function xsrfToken() {
@@ -44,7 +78,7 @@
         await whenLet(xsrfToken(), token => {
           headers.set('X-XSRF-TOKEN', token)
         })
-        await whenLet(getUser(), user => {
+        await whenLet(userStore.get(), user => {
           headers.set('Authorization', 'Bearer ' + user.token)
         })
         return await fetch(target, {
@@ -55,7 +89,6 @@
       }
 
       function onSubmit(event) {
-        console.log(event)
         let loginForm = event.target
         let login = loginForm.login.value
         let password = loginForm.password.value
@@ -80,10 +113,13 @@
       }
 
       async function loginSuccessful(userId, token) {
-        let user = await updateUser(() => ({ id: userId, token }))
-        let userDetail = await authFetch(`/api/users/${user.id}`).then(resp => resp.json())
-        await updateUser(user => ({ ... user, ...userDetail.user }))
-        console.log(userDetail)
+        let user = await userStore.update(() => ({ id: userId, token }))
+        let [userDetail, { items }] = await Promise.all([
+          authFetch(`/api/users/${user.id}`).then(resp => resp.json()),
+          authFetch(`/api/users/${user.id}/items`).then(resp => resp.json())
+        ])
+        await userStore.update(user => ({ ... user, ...userDetail.user, items }))
+
       }
     </script>
   </body>
