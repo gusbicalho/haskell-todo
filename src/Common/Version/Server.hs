@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedLabels #-}
+
 module Common.Version.Server
   ( api
   , server
@@ -26,4 +28,4 @@ api = Proxy
 type ServerConstraints m a = (HasVal "version" Version a, MonadReader a m)
 
 server :: ServerConstraints m a => ServerT API m
-server = asks $ WireVersion . getVal @"version"
+server = asks $ WireVersion . #version

@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedLabels #-}
+
 module ServantTest.Controllers.Item where
 
 import Common.HasVal.Class
@@ -9,12 +11,12 @@ type ControllerConstraints env t m stmt = (HasVal "transactor" t env, Transactor
 
 findItemsByUserId :: ControllerConstraints env t m stmt => Integer -> env -> m [Item]
 findItemsByUserId userId env = do
-  let transactor = getVal @"transactor" env
+  let transactor = #transactor env
   transact transactor $ Db.Item.findItemsByUserId userId
 
 getItem :: ControllerConstraints env t m stmt => Integer -> env -> m (Maybe Item)
 getItem itemIdParam env = do
-  let transactor = getVal @"transactor" env
+  let transactor = #transactor env
   transact transactor $ Db.Item.getItem itemIdParam
 
 getItemBelongingToUserId :: ControllerConstraints env t m stmt => Integer -> Integer -> env -> m (Maybe Item)
@@ -29,5 +31,5 @@ getItemBelongingToUserId itemIdParam userIdParam env = do
 
 createItem :: ControllerConstraints env t m stmt => NewItem -> env -> m Item
 createItem newItem env = do
-  let transactor = getVal @"transactor" env
+  let transactor = #transactor env
   transact transactor $ Db.Item.createItem newItem

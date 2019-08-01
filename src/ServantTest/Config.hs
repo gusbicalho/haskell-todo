@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedLabels #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 module ServantTest.Config where
@@ -38,7 +39,7 @@ api = Proxy
 type ServerConstraints m c = (HasVal "config" Config c, CS.ServerConstraints m c)
 
 server :: ServerConstraints m c => ServerT API m
-server = asks $ getVal @"config"
+server = asks $ #config
 
 loadConfig :: IO Config
 loadConfig = CL.loadConfig

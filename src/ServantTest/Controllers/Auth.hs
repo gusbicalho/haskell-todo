@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedLabels #-}
+
 module ServantTest.Controllers.Auth where
 
 import Control.Monad
@@ -11,7 +13,7 @@ type ControllerConstraints env t m stmt = (HasVal "transactor" t env, Transactor
 
 checkUserLogin :: ControllerConstraints env t m stmt => LoginInput -> env -> m (Maybe User)
 checkUserLogin (LoginInput login password) env = do
-  let transactor = getVal @"transactor" env
+  let transactor = #transactor env
   maybeUser <- transact transactor $ Db.User.findUserByLogin login
   return $ do user <- maybeUser
               guard (password == userPassword user)

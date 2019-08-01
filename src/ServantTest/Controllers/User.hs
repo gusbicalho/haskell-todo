@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedLabels #-}
+
 module ServantTest.Controllers.User where
 
 import Common.HasVal.Class
@@ -9,15 +11,15 @@ type ControllerConstraints env t m stmt = (HasVal "transactor" t env, Transactor
 
 listUsers :: ControllerConstraints env t m stmt => env -> m [User]
 listUsers env = do
-  let transactor = getVal @"transactor" env
+  let transactor = #transactor env
   transact transactor Db.User.listUsers
 
 getUser :: ControllerConstraints env t m stmt => Integer -> env -> m (Maybe User)
 getUser idParam env = do
-  let transactor = getVal @"transactor" env
+  let transactor = #transactor env
   transact transactor $ Db.User.getUser idParam
 
 createUser :: ControllerConstraints env t m stmt => NewUser -> env -> m User
 createUser newUser env = do
-  let transactor = getVal @"transactor" env
+  let transactor = #transactor env
   transact transactor $ Db.User.createUser newUser

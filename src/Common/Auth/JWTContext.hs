@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedLabels #-}
+
 module Common.Auth.JWTContext where
 
 import Servant
@@ -13,6 +15,6 @@ type JWTContextConstraints env = ( HasVal "jwtSettings" JWTSettings env
                                  )
 
 jwtContext :: JWTContextConstraints env => env -> Context JWTContext
-jwtContext env = getVal @"jwtSettings" env
-              :. getVal @"cookieSettings" env
+jwtContext env = #jwtSettings env
+              :. #cookieSettings env
               :. EmptyContext

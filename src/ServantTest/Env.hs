@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedLabels #-}
+
 module ServantTest.Env where
 
 import Servant.Auth.Server
@@ -20,7 +22,7 @@ instance HasVal "transactor" SqliteDb Env where
   getVal = sqlite
 
 instance HasVal "version" Version Env where
-  getVal = getVal @"version" . config
+  getVal = #version . config
 
 instance HasVal "config" Config Env where
   getVal = config

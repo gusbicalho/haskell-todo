@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedLabels #-}
 {-# LANGUAGE QuasiQuotes #-}
 
 {- HLINT ignore "Redundant do" -}
@@ -14,7 +15,6 @@ import Control.Monad.Reader
 
 import qualified ServantTest.Env as Env
 import Common.Auth.Types as AT
-import Common.HasVal.Class
 import ServantTest.Db.Transactor (Transactor(..))
 import qualified ServantTest.Db.User as Db.User
 import ServantTest.Models.User
@@ -25,7 +25,7 @@ import ServantTest.Test.Helpers.TestEnv
 
 prepareDb :: Env.Env -> IO ()
 prepareDb env = do
-    let t = getVal @"transactor" env
+    let t = #transactor env
     transact t $ do
       Db.User.initDB
       Db.User.createUser user1
