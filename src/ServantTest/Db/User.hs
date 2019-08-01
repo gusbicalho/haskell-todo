@@ -6,6 +6,7 @@ module ServantTest.Db.User
 
 import Prelude hiding (id)
 import Data.Maybe (fromJust, listToMaybe)
+import Data.String (fromString)
 import Database.SQLite.Simple
 
 import ServantTest.Db.SQLite
@@ -43,8 +44,12 @@ instance ToRow DbNewUser where
 instance UserDb SQLiteAction where
   initDB :: SQLiteAction ()
   initDB = SQLiteAction $ \conn ->
-    execute_ conn
-      "CREATE TABLE IF NOT EXISTS users (id integer not null primary key, login text not null, password text not null)"
+    execute_ conn $
+      fromString $ "CREATE TABLE IF NOT EXISTS users "
+                ++ "( id integer not null primary key"
+                ++ ", login text not null unique"
+                ++ ", password text not null"
+                ++ ")"
 
   listUsers :: SQLiteAction [User]
   listUsers = SQLiteAction listUsers'
