@@ -39,7 +39,6 @@ instance HasVal "port" Env Port where
 cookieSettingsFromConfig :: Config -> CookieSettings
 cookieSettingsFromConfig config =
     defaultCookieSettings { cookieIsSecure
-                          , cookieXsrfSetting = Just defaultXsrfCookieSettings { xsrfExcludeGet = True }
                           , cookieSameSite = SameSiteStrict
                           }
   where cookieIsSecure | insecureAuthCookie config = NotSecure
