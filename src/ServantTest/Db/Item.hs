@@ -17,6 +17,7 @@ class ItemDb action where
   createItem :: NewItem -> action Item
   updateItem :: Item -> action (Maybe Item)
   findItemsByUserId :: Integer -> action [Item]
+  deleteItem :: Integer -> action (Maybe Item)
 
 instance ItemDb SQLiteAction where
   initDB :: SQLiteAction ()
@@ -41,6 +42,9 @@ instance ItemDb SQLiteAction where
 
   findItemsByUserId :: Integer -> SQLiteAction [Item]
   findItemsByUserId userId = SQLiteAction $ findItemsByUserId' userId
+
+  deleteItem :: Integer -> SQLiteAction (Maybe Item)
+  deleteItem itemId = SQLiteAction $ deleteItem' itemId
 
 newtype DbItemState = DbItemState { dbToItemState :: ItemState } deriving (Eq, Show)
 newtype DbItem = DbItem { dbToItem :: Item } deriving (Eq, Show)
@@ -74,6 +78,14 @@ findItemsByUserId' :: Integer -> Connection -> IO [Item]
 findItemsByUserId' userId conn = do
   results <- query conn "SELECT id, title, state, userId FROM items WHERE userId = ? ORDER BY id" [userId]
   return . map dbToItem $ results
+
+deleteItem' :: Integer -> Connection -> IO (Maybe Item)
+deleteItem' itemId conn = do
+  maybeItem <- getItem' itemId conn
+  case maybeItem of
+    Nothing -> return ()
+    Just _ -> execute conn "DELETE FROM items WHERE id = ?" [itemId]
+  return maybeItem
 
 -- Instances
 instance FromField DbItemState where
