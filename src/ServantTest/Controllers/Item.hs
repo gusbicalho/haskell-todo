@@ -7,7 +7,7 @@ import ServantTest.Db.Transactor (Transactor(..))
 import ServantTest.Models.Item
 import qualified ServantTest.Db.Item as Db.Item
 
-type ControllerConstraints env t m stmt = (HasVal "transactor" t env, Transactor t m stmt, Db.Item.ItemDb stmt)
+type ControllerConstraints env t m stmt = (HasVal "transactor" env t, Transactor t m stmt, Db.Item.ItemDb stmt)
 
 findItemsByUserId :: ControllerConstraints env t m stmt => Integer -> env -> m [Item]
 findItemsByUserId userId env = do

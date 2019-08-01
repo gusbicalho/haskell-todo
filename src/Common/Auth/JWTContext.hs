@@ -10,8 +10,8 @@ type JWTContext = '[ JWTSettings
                    , CookieSettings
                    ]
 
-type JWTContextConstraints env = ( HasVal "jwtSettings" JWTSettings env
-                                 , HasVal "cookieSettings" CookieSettings env
+type JWTContextConstraints env = ( HasVal "jwtSettings" env JWTSettings
+                                 , HasVal "cookieSettings" env CookieSettings
                                  )
 
 jwtContext :: JWTContextConstraints env => env -> Context JWTContext

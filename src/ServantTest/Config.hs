@@ -26,7 +26,7 @@ data Config = Config { port :: Port
 instance HasVal "config" Config Config where
   getVal = id
 
-instance HasVal "version" Version Config where
+instance HasVal "version" Config Version where
   getVal = fromText . version
 
 $(deriveJSON defaultOptions ''Config)
@@ -36,7 +36,7 @@ type API = CS.API Config
 api :: Proxy API
 api = Proxy
 
-type ServerConstraints m c = (HasVal "config" Config c, CS.ServerConstraints m c)
+type ServerConstraints m c = (HasVal "config" c Config, CS.ServerConstraints m c)
 
 server :: ServerConstraints m c => ServerT API m
 server = asks $ #config

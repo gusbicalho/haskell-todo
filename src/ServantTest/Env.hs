@@ -18,22 +18,22 @@ data Env = Env {
 , cookieSettings :: CookieSettings
 }
 
-instance HasVal "transactor" SqliteDb Env where
+instance HasVal "transactor" Env SqliteDb where
   getVal = sqlite
 
-instance HasVal "version" Version Env where
+instance HasVal "version" Env Version where
   getVal = #version . config
 
-instance HasVal "config" Config Env where
+instance HasVal "config" Env Config where
   getVal = config
 
-instance HasVal "jwtSettings" JWTSettings Env where
+instance HasVal "jwtSettings" Env JWTSettings where
   getVal = jwtSettings
 
-instance HasVal "cookieSettings" CookieSettings Env where
+instance HasVal "cookieSettings" Env CookieSettings where
   getVal = cookieSettings
 
-instance HasVal "port" Port Env where
+instance HasVal "port" Env Port where
   getVal = port . config
 
 cookieSettingsFromConfig :: Config -> CookieSettings

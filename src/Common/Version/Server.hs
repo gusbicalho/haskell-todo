@@ -25,7 +25,7 @@ type API = Get '[JSON] WireVersion
 api :: Proxy API
 api = Proxy
 
-type ServerConstraints m a = (HasVal "version" Version a, MonadReader a m)
+type ServerConstraints m a = (HasVal "version" a Version, MonadReader a m)
 
 server :: ServerConstraints m a => ServerT API m
 server = asks $ WireVersion . #version

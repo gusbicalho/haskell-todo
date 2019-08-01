@@ -6,8 +6,8 @@ module Common.HasVal.Class where
 import GHC.TypeLits
 import GHC.OverloadedLabels
 
-class HasVal (k :: Symbol) t env | k env -> t where
+class HasVal (k :: Symbol) env t | k env -> t where
   getVal :: env -> t
 
-instance HasVal k t env => IsLabel (k :: Symbol) (env -> t) where
+instance HasVal k env t => IsLabel (k :: Symbol) (env -> t) where
   fromLabel = getVal @k

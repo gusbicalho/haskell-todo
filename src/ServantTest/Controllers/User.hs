@@ -7,7 +7,7 @@ import ServantTest.Db.Transactor (Transactor(..))
 import ServantTest.Models.User (User(..), NewUser(..))
 import ServantTest.Db.User as Db.User
 
-type ControllerConstraints env t m stmt = (HasVal "transactor" t env, Transactor t m stmt, UserDb stmt)
+type ControllerConstraints env t m stmt = (HasVal "transactor" env t, Transactor t m stmt, UserDb stmt)
 
 listUsers :: ControllerConstraints env t m stmt => env -> m [User]
 listUsers env = do
