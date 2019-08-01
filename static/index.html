@@ -8,7 +8,7 @@
       Password: <input name="password" type="password" /><br/>
       <input type="submit" value="Login!" />
     </form>
-    <div>
+    <div id="user-content">
       <h2>To-dos for user <span id="user-login"></span> </h2>
       <ul id="todos"></ul>
     </div>
@@ -36,7 +36,16 @@
       let userStore = new Store(null, user => {
         whenLet(user.login, login => {
           document.querySelector("#user-login").innerHTML = login
+          const userContent = document.querySelector("#user-content")
+          if (!userContent.querySelector("#new-todo")) {
+            userContent.appendChild(makeNewTodoForm())
+          }
         })
+        if (!user.login) {
+          whenLet(document.querySelector("#new-todo"), newTodoForm => {
+            newTodoForm.remove()
+          })
+        }
         whenLet(user.items, items => {
           const todos = document.querySelector("#todos")
           todos.innerHTML = ""
@@ -47,6 +56,13 @@
           }
         })
       })
+
+      function makeNewTodoForm() {
+        const form = document.createElement("form")
+        form.id = "new-todo"
+        form.append("new todo")
+        return form
+      }
 
       async function refreshItems() {
         const user = await userStore.get()
