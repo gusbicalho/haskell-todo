@@ -29,7 +29,7 @@
         }
 
         async get() {
-          return await this.update(u => u)
+          return this._val
         }
       }
 
@@ -42,23 +42,62 @@
           todos.innerHTML = ""
           for (item of items) {
             const li = document.createElement("li")
-            li.append(makeItemView(item))
+            li.appendChild(makeItemView(item))
             todos.appendChild(li)
           }
         })
       })
 
-      const updateItemState = (item, div) => () => {
-        console.log(item)
+      async function refreshItems() {
+        const user = await userStore.get()
+        const updatedItems = await authFetch(`/api/users/${user.id}/items`).then(resp => resp.json())
+        await userStore.update(user => ({
+          ...user,
+          items: updatedItems.items
+        }))
+        return null
+      }
+
+      const updateItemState = ({ id, state, userId }) => async () => {
+        const newState = {
+          'ToDo': 'Blocked',
+          'Blocked': 'InProgress',
+          'InProgress': 'Done',
+          'Done': 'ToDo',
+        }[state]
+        await authFetch(`/api/items/${id}`, {
+          method: 'put',
+          body: JSON.stringify({ state: newState })
+        })
+        await refreshItems()
+      }
+
+      const deleteItem = ({ id }) => async () => {
+        await authFetch(`/api/items/${id}`, {
+          method: 'delete',
+        })
+        await refreshItems()
       }
 
       function makeItemView(item) {
         const div = document.createElement("div")
+
         const stateBtn = document.createElement("button")
-        stateBtn.onclick = updateItemState(item, div)
+        stateBtn.innerHTML = ""
         stateBtn.append(item.state)
+        stateBtn.onclick = updateItemState(item)
         div.appendChild(stateBtn)
-        div.append(item.title)
+
+        const titleText = document.createElement("span")
+        titleText.innerHTML = ""
+        titleText.append(item.title)
+        div.appendChild(titleText)
+
+        const deleteBtn = document.createElement("button")
+        deleteBtn.append("X")
+        deleteBtn.onclick = deleteItem(item)
+        div.appendChild(deleteBtn)
+
         return div
       }
 
@@ -75,6 +114,9 @@
       async function authFetch(target, options) {
         options = options || {}
         let headers = options.headers || new Headers()
+        if (!headers.get('content-type')) {
+          headers.set('content-type', 'application/json')
+        }
         await whenLet(xsrfToken(), token => {
           headers.set('X-XSRF-TOKEN', token)
         })
@@ -114,12 +156,9 @@
 
       async function loginSuccessful(userId, token) {
         let user = await userStore.update(() => ({ id: userId, token }))
-        let [userDetail, { items }] = await Promise.all([
-          authFetch(`/api/users/${user.id}`).then(resp => resp.json()),
-          authFetch(`/api/users/${user.id}/items`).then(resp => resp.json())
-        ])
-        await userStore.update(user => ({ ... user, ...userDetail.user, items }))
-
+        let userDetail = await authFetch(`/api/users/${user.id}`).then(resp => resp.json())
+        await userStore.update(user => ({ ...user, ...userDetail.user }))
+        await refreshItems()
       }
     </script>
   </body>
