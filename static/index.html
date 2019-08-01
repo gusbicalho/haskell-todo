@@ -60,7 +60,29 @@
       function makeNewTodoForm() {
         const form = document.createElement("form")
         form.id = "new-todo"
-        form.append("new todo")
+        form.innerHTML = `
+          <input name="newtitle" type="text" />
+          <input type="submit" value="Add" />
+        `
+        form.onsubmit = () => {
+          const title = ("" + form.newtitle.value).trim()
+          if (title === "") {
+            return false
+          }
+          whenLet(userStore.get(), async user => {
+            await authFetch(`/api/items`, {
+              method: 'post',
+              body: JSON.stringify({
+                userId: user.id,
+                title,
+                state: 'ToDo'
+              })
+            })
+            form.reset()
+            await refreshItems()
+          })
+          return false
+        }
         return form
       }
 
