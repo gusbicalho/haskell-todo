@@ -16,12 +16,16 @@
       let loginForm = document.querySelector("#login-form")
       loginForm.onsubmit = onSubmit
 
-      let loggedInUser = null;
-      async function loggedInUserUpdated(transform) {
-        loggedInUser = transform(loggedInUser)
-        titleUserLogin = document.querySelector("#user-login")
-        titleUserLogin.innerHTML = loggedInUser.login
-        return loggedInUser
+      let _loggedInUser = null;
+      async function updateUser(transform) {
+        _loggedInUser = transform(_loggedInUser)
+        whenLet(_loggedInUser.login, login => {
+          document.querySelector("#user-login").innerHTML = login
+        })
+        return _loggedInUser
+      }
+      async function getUser() {
+        return await updateUser(u => u);
       }
 
       function xsrfToken() {
@@ -30,16 +34,20 @@
       }
 
       function whenLet(x, f) {
-        if (x) { return f(x) }
-        return null
+        if (!x) return null;
+        return x.then ? x.then(x2 => whenLet(x2, f)) : f(x)
       }
 
-      function authFetch(target, options) {
+      async function authFetch(target, options) {
+        options = options || {}
         let headers = options.headers || new Headers()
-        whenLet(xsrfToken(), token => {
+        await whenLet(xsrfToken(), token => {
           headers.set('X-XSRF-TOKEN', token)
         })
-        fetch(target, {
+        await whenLet(getUser(), user => {
+          headers.set('Authorization', 'Bearer ' + user.token)
+        })
+        return await fetch(target, {
           ...options,
           headers,
           credentials: 'same-origin',
@@ -66,14 +74,15 @@
             alert(result.error)
             return;
           }
-          loginSuccessful(result.userId)
+          loginSuccessful(result.identity.userId, result.token)
         })
         return false
       }
 
-      async function loginSuccessful(userId) {
-        let user = await loggedInUserUpdated(() => ({ id: userId }))
-        let userDetail = await authFetch(`/api/users/${user.id}`, { credentials: 'include' })
+      async function loginSuccessful(userId, token) {
+        let user = await updateUser(() => ({ id: userId, token }))
+        let userDetail = await authFetch(`/api/users/${user.id}`).then(resp => resp.json())
+        await updateUser(user => ({ ... user, ...userDetail.user }))
         console.log(userDetail)
       }
     </script>
