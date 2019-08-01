@@ -31,9 +31,11 @@ updateItem (ItemUpdate { updateId, updateUserId, updateTitle, updateState }) env
       case guardMatchingUser updateUserId =<< maybeItem of
         Nothing -> return Nothing
         Just item -> do
-          Db.Item.updateItem item { itemTitle = updateTitle
-                                  , itemState = updateState
-                                  }
+          Db.Item.updateItem . updatingTitle updateTitle . updatingState updateState $ item
+  where updatingTitle Nothing         item = item
+        updatingTitle (Just newTitle) item = item { itemTitle = newTitle }
+        updatingState Nothing         item = item
+        updatingState (Just newState) item = item { itemState = newState }
 
 deleteItemBelongingToUserId :: ControllerConstraints env t m action => Integer -> Integer -> env -> m (Maybe Item)
 deleteItemBelongingToUserId itemIdParam userIdParam env = do

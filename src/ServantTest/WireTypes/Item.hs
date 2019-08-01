@@ -35,7 +35,7 @@ data NewItemInput = NewItemInput {
 $(deriveJSON defaultOptions { fieldLabelModifier = dropPrefix_ } ''NewItemInput)
 
 data ItemUpdateInput = ItemUpdateInput {
-  updateInput_title :: T.Text
-, updateInput_state :: ItemState
+  updateInput_title :: Maybe T.Text
+, updateInput_state :: Maybe ItemState
 }
 $(deriveJSON defaultOptions { fieldLabelModifier = dropPrefix_ } ''ItemUpdateInput)

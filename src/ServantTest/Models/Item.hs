@@ -40,7 +40,7 @@ data NewItem = NewItem {
 
 data ItemUpdate = ItemUpdate {
   updateId :: Integer
-, updateTitle :: Title
-, updateState :: ItemState
+, updateTitle :: Maybe Title
+, updateState :: Maybe ItemState
 , updateUserId :: Integer
 }
