@@ -33,3 +33,9 @@ data NewItemInput = NewItemInput {
 , input_userId :: Integer
 } deriving (Eq, Show)
 $(deriveJSON defaultOptions { fieldLabelModifier = dropPrefix_ } ''NewItemInput)
+
+data ItemUpdateInput = ItemUpdateInput {
+  updateInput_title :: T.Text
+, updateInput_state :: ItemState
+}
+$(deriveJSON defaultOptions { fieldLabelModifier = dropPrefix_ } ''ItemUpdateInput)

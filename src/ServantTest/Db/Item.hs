@@ -15,6 +15,7 @@ class ItemDb action where
   initDB :: action ()
   getItem :: Integer -> action (Maybe Item)
   createItem :: NewItem -> action Item
+  updateItem :: Item -> action (Maybe Item)
   findItemsByUserId :: Integer -> action [Item]
 
 instance ItemDb SQLiteAction where
@@ -34,6 +35,9 @@ instance ItemDb SQLiteAction where
 
   createItem :: NewItem -> SQLiteAction Item
   createItem newItem = SQLiteAction $ createItem' newItem
+
+  updateItem :: Item -> SQLiteAction (Maybe Item)
+  updateItem item = SQLiteAction $ updateItem' item
 
   findItemsByUserId :: Integer -> SQLiteAction [Item]
   findItemsByUserId userId = SQLiteAction $ findItemsByUserId' userId
@@ -55,9 +59,20 @@ createItem' newItem conn = do
   rowId <- lastInsertRowId conn
   fromJust <$> getItem' (fromIntegral rowId) conn
 
+updateItem' :: Item -> Connection -> IO (Maybe Item)
+updateItem' (Item { itemId, itemUserId, itemTitle, itemState }) conn = do
+  maybeItem <- getItem' itemId conn
+  case maybeItem of
+    Nothing -> return Nothing
+    Just _ -> do
+      executeNamed conn "UPDATE items SET title = :title, state = :state, userId = :userId WHERE id = :rowId"
+                        [ ":rowId" := itemId, ":userId" := itemUserId
+                        , ":title" := titleToText itemTitle, ":state" := DbItemState itemState]
+      getItem' itemId conn
+
 findItemsByUserId' :: Integer -> Connection -> IO [Item]
 findItemsByUserId' userId conn = do
-  results <- query conn "SELECT id, title, state, userId FROM items WHERE userId = ?" [userId]
+  results <- query conn "SELECT id, title, state, userId FROM items WHERE userId = ? ORDER BY id" [userId]
   return . map dbToItem $ results
 
 -- Instances

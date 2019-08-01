@@ -22,6 +22,13 @@ inputToNewItem (Wire.NewItemInput titleText wireState userId) =
                    (toInternalState wireState)
                    userId
 
+inputToItemUpdate :: Integer -> Integer -> Wire.ItemUpdateInput -> Internal.ItemUpdate
+inputToItemUpdate itemId userId (Wire.ItemUpdateInput titleText wireState) =
+  Internal.ItemUpdate itemId
+                      (Internal.textToTitle titleText)
+                      (toInternalState wireState)
+                      userId
+
 -- TODO find a better way - maybe use (read . show) + QuickChekc
 toWireState :: Internal.ItemState -> Wire.ItemState
 toWireState Internal.ToDo       = Wire.ToDo

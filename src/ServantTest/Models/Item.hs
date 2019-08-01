@@ -2,6 +2,7 @@ module ServantTest.Models.Item
   ( Item (..)
   , ItemState (..)
   , NewItem (..)
+  , ItemUpdate (..)
   , Title
   , titleToText
   , textToTitle
@@ -36,3 +37,10 @@ data NewItem = NewItem {
 , newState :: ItemState
 , newUserId :: Integer
 } deriving (Eq, Show)
+
+data ItemUpdate = ItemUpdate {
+  updateId :: Integer
+, updateTitle :: Title
+, updateState :: ItemState
+, updateUserId :: Integer
+}

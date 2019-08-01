@@ -22,12 +22,23 @@ getItem itemIdParam env = do
 getItemBelongingToUserId :: ControllerConstraints env t m action => Integer -> Integer -> env -> m (Maybe Item)
 getItemBelongingToUserId itemIdParam userIdParam env = do
     maybeItem <- getItem itemIdParam env
-    return $ maybeItem >>= guardMatchingUser
-  where
-    guardMatchingUser :: Item -> Maybe Item
-    guardMatchingUser item@Item { itemUserId }
-      | itemUserId == userIdParam = Just item
-      | otherwise = Nothing
+    return $ maybeItem >>= guardMatchingUser userIdParam
+
+updateItem :: ControllerConstraints env t m action => ItemUpdate -> env -> m (Maybe Item)
+updateItem (ItemUpdate { updateId, updateUserId, updateTitle, updateState }) env = do
+    transact (#transactor env) $ do
+      maybeItem <- Db.Item.getItem updateId
+      case guardMatchingUser updateUserId =<< maybeItem of
+        Nothing -> return Nothing
+        Just item -> do
+          Db.Item.updateItem item { itemTitle = updateTitle
+                                  , itemState = updateState
+                                  }
+
+guardMatchingUser :: Integer -> Item -> Maybe Item
+guardMatchingUser userIdParam item@Item { itemUserId }
+  | itemUserId == userIdParam = Just item
+  | otherwise = Nothing
 
 createItem :: ControllerConstraints env t m action => NewItem -> env -> m Item
 createItem newItem env = do
