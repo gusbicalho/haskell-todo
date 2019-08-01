@@ -1,13 +1,22 @@
 <!doctype html>
 <html>
   <head><title>Haskell TODO</title></head>
-  <body>
+  <div>
     <h1>TODO</h1>
-    <form id="login-form">
-      User: <input name="login" type="text" /><br/>
-      Password: <input name="password" type="password" /><br/>
-      <input type="submit" value="Login!" />
-    </form>
+    <div id="user-panel">
+      <form id="login-form">
+        <h2>I have an account</h2>
+        User: <input name="login" type="text" /><br/>
+        Password: <input name="password" type="password" /><br/>
+        <input type="submit" value="Login!" />
+      </form>
+      <form id="signup-form">
+        <h2>I need a new account</h2>
+        User: <input name="login" type="text" /><br/>
+        Password: <input name="password" type="password" /><br/>
+        <input type="submit" value="Signup!" />
+      </form>
+    </div>
     <div id="user-content">
       <h2>To-dos for user <span id="user-login"></span> </h2>
       <ul id="todos"></ul>
@@ -15,7 +24,9 @@
 
     <script>
       let loginForm = document.querySelector("#login-form")
-      loginForm.onsubmit = onSubmit
+      loginForm.onsubmit = onSubmitLogin
+      let signupForm = document.querySelector("#signup-form")
+      signupForm.onsubmit = onSubmitSignup
 
       class Store {
         constructor(val, watch) {
@@ -168,13 +179,38 @@
         })
       }
 
-      function onSubmit(event) {
+      function onSubmitLogin(event) {
         let loginForm = event.target
         let login = loginForm.login.value
         let password = loginForm.password.value
+        doLogin(login, password)
+        return false
+      }
+
+      function onSubmitSignup() {
+        let signupForm = event.target
+        let login = signupForm.login.value
+        let password = signupForm.password.value
+        doSignup(login, password)
+          .then(() => doLogin(login, password))
+          .then(() => signupForm.reset())
+        return false
+      }
+
+      async function doSignup(login, password) {
+        const headers = new Headers()
+        headers.set('content-type', 'application/json')
+        return fetch('/api/users', {
+          method: 'post',
+          headers,
+          body: JSON.stringify({ login, password }),
+        })
+      }
+
+      async function doLogin(login, password) {
         let headers = new Headers()
         headers.set('Authorization', 'Basic ' + btoa(login + ":" + password))
-        fetch('/api/auth/user', {
+        return fetch('/api/auth/user', {
           method: 'post',
           headers,
           credentials: 'same-origin',
@@ -189,7 +225,6 @@
           }
           loginSuccessful(result.identity.userId, result.token)
         })
-        return false
       }
 
       async function loginSuccessful(userId, token) {
