@@ -58,7 +58,7 @@ spec = do
                                                   ,{id: 2, login: "albert@einstein.com"}]}
                                          |]
   describe "GET /:id" $ do
-    before (app (loginAs "albert@einstein.com" "swordfish")) $ do
+    before (app (const $ loginAsUser 2)) $ do
       describe "authenticated as a user" $ do
         describe "get the user" $ do
           let userRequest = get "/2"
@@ -71,7 +71,7 @@ spec = do
           it "responds with 403" $ do
             userRequest `shouldRespondWith` 403
   describe "POST /" $ do
-    before (app (loginAs "albert@einstein.com" "swordfish")) $ do
+    before (app (const $ loginAsUser 2)) $ do
       describe "as an authenticated user" $ do
         it "responds with 403" $ do
           postJson "/" [json|{login: "gust", password: "pass123"}|] `shouldRespondWith` 403

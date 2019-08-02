@@ -1,7 +1,6 @@
 module ServantTest.Test.Helpers.TestEnv where
 
 import Control.Monad.Reader
-import Data.String
 import System.IO.Temp as Temp (emptySystemTempFile)
 import Servant
 import Servant.Auth.Server as SAS
@@ -9,7 +8,6 @@ import Common.Auth.Types as AT
 import qualified ServantTest.Env as Env
 import qualified ServantTest.Config as Config
 import qualified ServantTest.HttpApi as HttpApi
-import qualified ServantTest.HttpApi.Auth as HttpApi.Auth
 
 tempDb :: IO FilePath
 tempDb = Temp.emptySystemTempFile "test.db"
@@ -42,9 +40,14 @@ testEnvApp transEnv prepare = do
 testApp :: (Env.Env -> IO ()) -> IO Application
 testApp prepare = snd <$> testEnvApp id prepare
 
-loginAs :: String -> String -> Env.Env -> IO (AuthResult AT.AuthTokenClaims)
-loginAs login password env = HttpApi.Auth.basicAuthUser env authData
-  where authData = BasicAuthData (fromString login) (fromString password)
+loginAsUser :: Integer -> IO (AuthResult AT.AuthTokenClaims)
+loginAsUser userId = return $ SAS.Authenticated claims
+  where
+    claims = AT.AuthTokenClaims {
+      AT.identity = AT.Known $ AT.User {
+        AT.userId = userId
+      }
+    }
 
 unauthenticated :: Applicative m => env -> m (AuthResult a)
 unauthenticated _ = pure SAS.Indefinite

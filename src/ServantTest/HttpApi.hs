@@ -48,7 +48,7 @@ server =
   )
   :<|> ( -- /api
          Version.server
-    :<|> Auth.server
+    :<|> Auth.authenticationServer
     :<|> \auth -> (
            User.server auth
       :<|> Item.server auth
