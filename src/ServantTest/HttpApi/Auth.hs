@@ -15,11 +15,11 @@ import qualified Common.Auth.HttpApi as Auth.HttpApi
 import qualified ServantTest.Env as Env
 import ServantTest.Models.User
 import ServantTest.Adapters.Auth
-import ServantTest.Controllers.Auth
+import ServantTest.Controllers.User
 
 getUserToken :: Env.Env -> BasicAuthData -> IO (Maybe AT.AuthTokenClaims)
 getUserToken env basicAuthData = do
-    maybeUser <- checkUserLogin (basicAuthToLoginInput basicAuthData) env
+    maybeUser <- checkLogin (basicAuthToLoginInput basicAuthData) env
     return $ toToken <$> maybeUser
   where
     toToken User { userId } = AT.AuthTokenClaims {

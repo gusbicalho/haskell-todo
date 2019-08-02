@@ -25,11 +25,22 @@ spec = do
     it "should insert the new user in the Db and return the full User" $ do
       runTest (createUser mockNewUser mockDb)
         `shouldBe` (mockUser, [[CreateUser mockNewUser]])
+  describe "checkLogin" $ do
+    it "should be Just a user if it is found by its login and the password matches" $ do
+      runTest (checkLogin (LoginInput mockLogin mockPassword) mockDb)
+        `shouldBe` (Just mockUser, [[FindUserByLogin mockLogin]])
+    it "should be Nothing if the user is found by its login, but the password does not match" $ do
+      runTest (checkLogin (LoginInput mockLogin "hahaha") mockDb)
+        `shouldBe` (Nothing, [[FindUserByLogin mockLogin]])
+    it "should be Nothing if the user is not found by its login" $ do
+      runTest (checkLogin (LoginInput "notme@web.com" "hahaha") mockDb)
+        `shouldBe` (Nothing, [[FindUserByLogin "notme@web.com"]])
 
 data UserDbAction = CreateTable
                   | ListUsers
                   | CreateUser NewUser
                   | GetUser Integer
+                  | FindUserByLogin Login
                   deriving (Eq, Show)
 
 mockDb :: MockDb UserDbAction
@@ -40,7 +51,10 @@ instance Db.User.UserDb (DbActions UserDbAction) where
   listUsers = DbActions [ListUsers] [mockUser]
   getUser idParam = DbActions [GetUser idParam] $ getMockUser idParam
   createUser newUser = DbActions [CreateUser newUser] mockUser
-  findUserByLogin = undefined
+  findUserByLogin login = DbActions [FindUserByLogin login] foundUser
+    where
+      foundUser | login == userLogin mockUser = Just mockUser
+                | otherwise                   = Nothing
 
 nonExistingId :: Integer
 nonExistingId = 99
@@ -50,11 +64,17 @@ getMockUser idParam
   | idParam == nonExistingId = Nothing
   | otherwise                = Just mockUser { userId = idParam }
 
+mockLogin :: Login
+mockLogin = "test@test"
+
+mockPassword :: Password
+mockPassword = "asdqwe"
+
 mockUser :: User
 mockUser = User {
   userId = 7
-, userLogin = textToLogin "test@test"
-, userPassword = textToPassword "asdqwe"
+, userLogin = mockLogin
+, userPassword = mockPassword
 }
 
 mockNewUser :: NewUser
