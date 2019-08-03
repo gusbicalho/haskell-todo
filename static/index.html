@@ -1,0 +1,239 @@
+<!doctype html>
+<html>
+  <head><title>Haskell TODO</title></head>
+  <div>
+    <h1>TODO</h1>
+    <div id="user-panel">
+      <form id="login-form">
+        <h2>I have an account</h2>
+        User: <input name="login" type="text" /><br/>
+        Password: <input name="password" type="password" /><br/>
+        <input type="submit" value="Login!" />
+      </form>
+      <form id="signup-form">
+        <h2>I need a new account</h2>
+        User: <input name="login" type="text" /><br/>
+        Password: <input name="password" type="password" /><br/>
+        <input type="submit" value="Signup!" />
+      </form>
+    </div>
+    <div id="user-content">
+      <h2>To-dos for user <span id="user-login"></span> </h2>
+      <ul id="todos"></ul>
+    </div>
+
+    <script>
+      let loginForm = document.querySelector("#login-form")
+      loginForm.onsubmit = onSubmitLogin
+      let signupForm = document.querySelector("#signup-form")
+      signupForm.onsubmit = onSubmitSignup
+
+      class Store {
+        constructor(val, watch) {
+          this._val = val
+          this._watch = watch
+        }
+        async update(transform) {
+          this._val = await transform(this._val)
+          await this._watch(this._val)
+          return this._val
+        }
+
+        async get() {
+          return this._val
+        }
+      }
+
+      let userStore = new Store(null, user => {
+        whenLet(user.login, login => {
+          document.querySelector("#user-login").innerHTML = login
+          const userContent = document.querySelector("#user-content")
+          if (!userContent.querySelector("#new-todo")) {
+            userContent.appendChild(makeNewTodoForm())
+          }
+        })
+        if (!user.login) {
+          whenLet(document.querySelector("#new-todo"), newTodoForm => {
+            newTodoForm.remove()
+          })
+        }
+        whenLet(user.items, items => {
+          const todos = document.querySelector("#todos")
+          todos.innerHTML = ""
+          for (item of items) {
+            const li = document.createElement("li")
+            li.appendChild(makeItemView(item))
+            todos.appendChild(li)
+          }
+        })
+      })
+
+      function makeNewTodoForm() {
+        const form = document.createElement("form")
+        form.id = "new-todo"
+        form.innerHTML = `
+          <input name="newtitle" type="text" />
+          <input type="submit" value="Add" />
+        `
+        form.onsubmit = () => {
+          const title = ("" + form.newtitle.value).trim()
+          if (title === "") {
+            return false
+          }
+          whenLet(userStore.get(), async user => {
+            await authFetch(`/api/items`, {
+              method: 'post',
+              body: JSON.stringify({
+                userId: user.id,
+                title,
+                state: 'ToDo'
+              })
+            })
+            form.reset()
+            await refreshItems()
+          })
+          return false
+        }
+        return form
+      }
+
+      async function refreshItems() {
+        const user = await userStore.get()
+        const updatedItems = await authFetch(`/api/users/${user.id}/items`).then(resp => resp.json())
+        await userStore.update(user => ({
+          ...user,
+          items: updatedItems.items
+        }))
+        return null
+      }
+
+      const updateItemState = ({ id, state, userId }) => async () => {
+        const newState = {
+          'ToDo': 'Blocked',
+          'Blocked': 'InProgress',
+          'InProgress': 'Done',
+          'Done': 'ToDo',
+        }[state]
+        await authFetch(`/api/items/${id}`, {
+          method: 'put',
+          body: JSON.stringify({ state: newState })
+        })
+        await refreshItems()
+      }
+
+      const deleteItem = ({ id }) => async () => {
+        await authFetch(`/api/items/${id}`, {
+          method: 'delete',
+        })
+        await refreshItems()
+      }
+
+      function makeItemView(item) {
+        const div = document.createElement("div")
+
+        const stateBtn = document.createElement("button")
+        stateBtn.innerHTML = ""
+        stateBtn.append(item.state)
+        stateBtn.onclick = updateItemState(item)
+        div.appendChild(stateBtn)
+
+        const titleText = document.createElement("span")
+        titleText.innerHTML = ""
+        titleText.append(item.title)
+        div.appendChild(titleText)
+
+        const deleteBtn = document.createElement("button")
+        deleteBtn.append("X")
+        deleteBtn.onclick = deleteItem(item)
+        div.appendChild(deleteBtn)
+
+        return div
+      }
+
+      function xsrfToken() {
+        let r = document.cookie.match(new RegExp('XSRF-TOKEN=([^;]+)'))
+        if (r) return r[1];
+      }
+
+      function whenLet(x, f) {
+        if (!x) return null;
+        return x.then ? x.then(x2 => whenLet(x2, f)) : f(x)
+      }
+
+      async function authFetch(target, options) {
+        options = options || {}
+        let headers = options.headers || new Headers()
+        if (!headers.get('content-type')) {
+          headers.set('content-type', 'application/json')
+        }
+        await whenLet(xsrfToken(), token => {
+          headers.set('X-XSRF-TOKEN', token)
+        })
+        await whenLet(userStore.get(), user => {
+          headers.set('Authorization', 'Bearer ' + user.token)
+        })
+        return await fetch(target, {
+          ...options,
+          headers,
+          credentials: 'same-origin',
+        })
+      }
+
+      function onSubmitLogin(event) {
+        let loginForm = event.target
+        let login = loginForm.login.value
+        let password = loginForm.password.value
+        doLogin(login, password)
+        return false
+      }
+
+      function onSubmitSignup() {
+        let signupForm = event.target
+        let login = signupForm.login.value
+        let password = signupForm.password.value
+        doSignup(login, password)
+          .then(() => doLogin(login, password))
+          .then(() => signupForm.reset())
+        return false
+      }
+
+      async function doSignup(login, password) {
+        const headers = new Headers()
+        headers.set('content-type', 'application/json')
+        return fetch('/api/users', {
+          method: 'post',
+          headers,
+          body: JSON.stringify({ login, password }),
+        })
+      }
+
+      async function doLogin(login, password) {
+        let headers = new Headers()
+        headers.set('content-type', 'application/json')
+        return fetch('/api/auth/user', {
+          method: 'post',
+          headers,
+          body: JSON.stringify({ username: login, password }),
+          credentials: 'same-origin',
+        }).then((response) =>
+          response.status === 200
+            ? response.json()
+            : { error: response.statusText }
+        ).then((result) => {
+          if (result.error) {
+            alert(result.error)
+            return;
+          }
+          loginSuccessful(result.identity.userId, result.token)
+        })
+      }
+
+      async function loginSuccessful(userId, token) {
+        let user = await userStore.update(() => ({ id: userId, token }))
+        let userDetail = await authFetch(`/api/users/${user.id}`).then(resp => resp.json())
+        await userStore.update(user => ({ ...user, ...userDetail.user }))
+        await refreshItems()
+      }
+    </script>
+  </body>
+</html>

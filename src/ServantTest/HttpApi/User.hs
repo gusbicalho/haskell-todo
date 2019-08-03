@@ -8,15 +8,23 @@ module ServantTest.HttpApi.User
 import Control.Monad.Except
 import Control.Monad.Reader
 import Servant
+import Servant.Auth.Server
+import ServantTest.Auth.Types (IdentityTokenClaims)
+import qualified ServantTest.Auth.Logic as Auth.Logic
 import qualified ServantTest.Env as Env
 import qualified ServantTest.WireTypes.User as Wire.User
 import qualified ServantTest.Controllers.User as C.User
 import qualified ServantTest.Adapters.User as A.User
+import qualified ServantTest.WireTypes.Item as Wire.Item
+import qualified ServantTest.Controllers.Item as C.Item
+import qualified ServantTest.Adapters.Item as A.Item
 
-type API = QueryParam "sortBy" Wire.User.SortBy :> Get '[JSON] Wire.User.ManyUsers
+type API = Get '[JSON] Wire.User.ManyUsers
       :<|> ReqBody '[JSON] Wire.User.NewUserInput :> Post '[JSON] Wire.User.SingleUser
       :<|> Capture "userid" Integer :> Get '[JSON] Wire.User.SingleUser
-      :<|> Capture "userid" Integer :> Delete '[JSON] Wire.User.SingleUser
+      :<|> Capture "userid" Integer :> "items" :> (
+        Get '[JSON] Wire.Item.ManyItems
+      )
 
 api :: Proxy API
 api = Proxy
@@ -26,38 +34,39 @@ type ServerConstraints m = ( MonadError ServantErr m
                            , MonadReader Env.Env m
                            )
 
-server :: ServerConstraints m => ServerT API m
-server = listUsers
-    :<|> createUser
-    :<|> getUser
-    :<|> deleteUser
+server :: ServerConstraints m => AuthResult IdentityTokenClaims -> ServerT API m
+server auth = listUsers
+         :<|> createUser
+         :<|> getUser
+         :<|> userItems
   where -- Handlers
-    listUsers sortBy = do
-        env <- ask
-        users <- C.User.listUsers (sorter sortBy) env
-        return $ A.User.manyWire users
-      where
-        sorter Nothing               = id
-        sorter (Just Wire.User.Age)  = C.User.sortOnAge
-        sorter (Just Wire.User.Name) = C.User.sortOnName
-
-    createUser newUserInput = do
+    listUsers = do
       env <- ask
-      user <- C.User.createUser (A.User.inputToNewUser newUserInput) env
-      return $ A.User.singleWire user
+      users <- C.User.listUsers env
+      return $ A.User.manyWire users
 
-    getUser idParam = do
-        env <- ask
-        maybeUser <- C.User.getUser idParam env
-        result maybeUser
-      where
-        result Nothing  = throwError err404
-        result (Just x) = return $ A.User.singleWire x
+    createUser newUserInput
+      | Auth.Logic.authenticated auth = throwError err403
+      | otherwise = do
+          env <- ask
+          user <- C.User.createUser (A.User.inputToNewUser newUserInput) env
+          return $ A.User.singleWire user
 
-    deleteUser idParam = do
-        env <- ask
-        maybeUser <- C.User.deleteUser idParam env
-        result maybeUser
-      where
-        result Nothing  = throwError err404
-        result (Just x) = return $ A.User.singleWire x
+    getUser idParam
+      | not $ Auth.Logic.authenticatedAsUser idParam auth = throwError err403
+      | otherwise = do
+          env <- ask
+          maybeUser <- C.User.getUser idParam env
+          result maybeUser
+        where
+          result Nothing  = throwError err404
+          result (Just x) = return $ A.User.singleWire x
+
+    userItems userIdParam
+      | not $ Auth.Logic.authenticatedAsUser userIdParam auth = throwError err403
+      | otherwise = getItems
+        where
+          getItems = do
+            env <- ask
+            items <- C.Item.findItemsByUserId userIdParam env
+            return $ A.Item.manyWire items

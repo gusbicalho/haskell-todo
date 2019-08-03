@@ -1,84 +1,82 @@
+{-# LANGUAGE OverloadedLabels #-}
+{-# LANGUAGE QuasiQuotes #-}
+
 {- HLINT ignore "Redundant do" -}
 module ServantTest.HttpApi.UserSpec (spec) where
 
 import Test.Hspec hiding (pendingWith)
 import Test.Hspec.Wai
+import Test.Hspec.Wai.JSON
 
 import Network.Wai
 import Servant
+import Servant.Auth.Server as SAS
 import Control.Monad.Reader
 
 import qualified ServantTest.Env as Env
-import qualified ServantTest.Config as Config
-import Common.HasVal.Class
+import ServantTest.Auth.Types
 import ServantTest.Db.Transactor (Transactor(..))
 import qualified ServantTest.Db.User as Db.User
 import ServantTest.Models.User
 import ServantTest.HttpApi.User (api, server)
 
-dbfile :: FilePath
-dbfile = ".tempdbs_usertest.db"
+import ServantTest.Test.Helpers.Wai
+import ServantTest.Test.Helpers.TestEnv
 
 prepareDb :: Env.Env -> IO ()
 prepareDb env = do
-    let t = getVal @"transactor" env
+    let t = #transactor env
     transact t $ do
-      users <- Db.User.listUsers
-      mapM_ (Db.User.deleteUser . userId) users
+      Db.User.initDB
       Db.User.createUser user1
       Db.User.createUser user2
     return ()
-  where user1 = NewUser { newName = "Isaac Newton"
-                        , newAge = 26
-                        , newEmail = "isaac@newton.com"
+  where user1 = NewUser { newLogin = "isaac@newton.com"
+                        , newPassword = "qwe123"
                         }
-        user2 = NewUser { newName = "Albert Einstein"
-                        , newAge = 42
-                        , newEmail = "albert@einstein.com"
+        user2 = NewUser { newLogin = "albert@einstein.com"
+                        , newPassword = "swordfish"
                         }
 
-app :: IO Application
-app = do
-  env <- Env.buildEnv config
-  prepareDb env
-  let hoisted = hoistServer api (provideDependencies env) server
-  return $ serve api hoisted
-  where provideDependencies env m = runReaderT m env
-        config = Config.Config {
-          Config.port = 8080
-        , Config.version = "testversion"
-        , Config.sqliteFile = dbfile
-        }
+app :: (Env.Env -> IO (AuthResult IdentityTokenClaims)) -> IO Application
+app authenticate = do
+    env <- testEnv id prepareDb
+    auth <- authenticate env
+    let hoisted = hoistServer api (provideDependencies env) (server auth)
+    return $ serve api hoisted
+  where
+    provideDependencies env m = runReaderT m env
 
 spec :: Spec
-spec = with app $ do
+spec = do
   describe "GET /" $ do
-    it "responds with 200" $ do
-      get "/" `shouldRespondWith` 200
-    it "responds with [User]" $ do
-      let users = "{\"users\":[{\"id\":1,\"name\":\"Isaac Newton\",\"age\":26,\"email\":\"isaac@newton.com\"},{\"id\":2,\"name\":\"Albert Einstein\",\"age\":42,\"email\":\"albert@einstein.com\"}]}"
-      get "/" `shouldRespondWith` users
-    it "is able to sortBy age" $ do
-      let users = "{\"users\":[{\"id\":1,\"name\":\"Isaac Newton\",\"age\":26,\"email\":\"isaac@newton.com\"},{\"id\":2,\"name\":\"Albert Einstein\",\"age\":42,\"email\":\"albert@einstein.com\"}]}"
-      get "/?sortBy=age" `shouldRespondWith` users
-    it "is able to sortBy name" $ do
-      let users = "{\"users\":[{\"id\":2,\"name\":\"Albert Einstein\",\"age\":42,\"email\":\"albert@einstein.com\"},{\"id\":1,\"name\":\"Isaac Newton\",\"age\":26,\"email\":\"isaac@newton.com\"}]}"
-      get "/?sortBy=name" `shouldRespondWith` users
-  describe "GET /:id" $ do
-    describe "for a known id" $ do
-      let userRequest = get "/2"
+    before (app unauthenticated) $ do
       it "responds with 200" $ do
-        userRequest `shouldRespondWith` 200
-      it "responds with User" $ do
-        let user = "{\"user\":{\"id\":2,\"name\":\"Albert Einstein\",\"age\":42,\"email\":\"albert@einstein.com\"}}"
-        userRequest `shouldRespondWith` user
-    describe "for an unknown id" $ do
-      let userRequest = get "/99"
-      it "responds with 404" $ do
-        userRequest `shouldRespondWith` 404
+        get "/" `shouldRespondWith` 200
+      it "responds with [User]" $ do
+        get "/" `shouldRespondWith` [json|{users: [{id: 1, login: "isaac@newton.com"}
+                                                  ,{id: 2, login: "albert@einstein.com"}]}
+                                         |]
+  describe "GET /:id" $ do
+    before (app (const $ loginAsUser 2)) $ do
+      describe "authenticated as a user" $ do
+        describe "get the user" $ do
+          let userRequest = get "/2"
+          it "responds with 200" $ do
+            userRequest `shouldRespondWith` 200
+          it "responds with User" $ do
+            userRequest `shouldRespondWith` [json|{user: {id: 2, login: "albert@einstein.com"}}|]
+        describe "get a different user" $ do
+          let userRequest = get "/99"
+          it "responds with 403" $ do
+            userRequest `shouldRespondWith` 403
   describe "POST /" $ do
-    it "should be tested" $ do
-      pendingWith "TODO"
-  describe "DELETE /:id" $ do
-    it "should be tested" $ do
-      pendingWith "TODO"
+    before (app (const $ loginAsUser 2)) $ do
+      describe "as an authenticated user" $ do
+        it "responds with 403" $ do
+          postJson "/" [json|{login: "gust", password: "pass123"}|] `shouldRespondWith` 403
+    before (app unauthenticated) $ do
+      describe "unauthenticated" $ do
+        it "responds with a new user" $ do
+          postJson "/" [json|{login: "gust", password: "pass123"}|]
+            `shouldRespondWith` [json|{user: {id: 3, login: "gust"}}|]

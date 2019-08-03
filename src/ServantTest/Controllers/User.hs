@@ -1,37 +1,34 @@
+{-# LANGUAGE OverloadedLabels #-}
+
 module ServantTest.Controllers.User where
 
-import Prelude hiding (id)
-import Data.List (sortOn)
+import Control.Monad
 import Common.HasVal.Class
-import ServantTest.Models.User (User(..), NewUser(..))
 import ServantTest.Db.Transactor (Transactor(..))
+import ServantTest.Models.User (User(..), NewUser(..), LoginInput (..))
 import ServantTest.Db.User as Db.User
 
-sortOnAge :: [User] -> [User]
-sortOnAge = sortOn userAge
+type ControllerConstraints env t m action = (HasVal "transactor" env t, Transactor t m action, UserDb action)
 
-sortOnName :: [User] -> [User]
-sortOnName = sortOn userName
+listUsers :: ControllerConstraints env t m action => env -> m [User]
+listUsers env = do
+  let transactor = #transactor env
+  transact transactor Db.User.listUsers
 
-type ControllerConstraints env t m stmt = (HasVal "transactor" t env, Transactor t m stmt, UserDb stmt)
-
-listUsers :: forall env t m stmt. ControllerConstraints env t m stmt => ([User] -> [User]) -> env -> m [User]
-listUsers listTransform env = do
-  let transactor = getVal @"transactor" env
-  allUsers <- transact transactor Db.User.listUsers
-  return $ listTransform allUsers
-
-getUser :: ControllerConstraints env t m stmt => Integer -> env -> m (Maybe User)
+getUser :: ControllerConstraints env t m action => Integer -> env -> m (Maybe User)
 getUser idParam env = do
-  let transactor = getVal @"transactor" env
+  let transactor = #transactor env
   transact transactor $ Db.User.getUser idParam
 
-createUser :: ControllerConstraints env t m stmt => NewUser -> env -> m User
+createUser :: ControllerConstraints env t m action => NewUser -> env -> m User
 createUser newUser env = do
-  let transactor = getVal @"transactor" env
+  let transactor = #transactor env
   transact transactor $ Db.User.createUser newUser
 
-deleteUser :: ControllerConstraints env t m stmt => Integer -> env -> m (Maybe User)
-deleteUser idParam env = do
-  let transactor = getVal @"transactor" env
-  transact transactor $ Db.User.deleteUser idParam
+checkLogin :: ControllerConstraints env t m action => LoginInput -> env -> m (Maybe User)
+checkLogin (LoginInput login password) env = do
+  let transactor = #transactor env
+  maybeUser <- transact transactor $ Db.User.findUserByLogin login
+  return $ do user <- maybeUser
+              guard (password == userPassword user)
+              return user

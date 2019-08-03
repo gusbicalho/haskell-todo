@@ -58,6 +58,7 @@ default-extensions:
   - TypeFamilies
   - TypeFamilyDependencies
   - TypeOperators
+  - ViewPatterns
 
 library:
   source-dirs: src
@@ -65,7 +66,11 @@ library:
   - base >= 4.7 && < 5
   - aeson
   - aeson-extra
+  - bytestring
+  - jose
   - mtl
+  - servant-auth
+  - servant-auth-server
   - servant-server
   - sqlite-simple
   - text
@@ -96,11 +101,19 @@ tests:
     dependencies:
     - base
     - servant-test
+    - bytestring
+    - http-client
+    - http-types
     - hspec
     - hspec-wai
     - hspec-wai-json
     - wai
+    - wai-extra
+    - warp
     - servant-server
+    - servant-auth
+    - servant-auth-server
     - aeson
     - mtl
     - text
+    - temporary

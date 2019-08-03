@@ -1,4 +1,4 @@
-module ServantTest.Test.Helpers where
+module ServantTest.Test.Helpers.MockDb where
 
 import Control.Monad.Writer
 import Common.HasVal.Class
@@ -7,6 +7,18 @@ import ServantTest.Db.Transactor (Transactor(..))
 data MockDb action = MockDb
 
 data DbActions action a = DbActions [action] a deriving (Eq, Show)
+
+instance Functor (DbActions action) where
+  fmap f (DbActions actions a) = DbActions actions (f a)
+
+instance Applicative (DbActions action) where
+  pure a = DbActions [] a
+  (DbActions actionsF f) <*> (DbActions actionsA a) = DbActions (actionsF <> actionsA) (f a)
+
+instance Monad (DbActions action) where
+  return a = DbActions [] a
+  (DbActions actions a) >>= f = let DbActions moreActions b = f a
+                                in DbActions (actions <> moreActions) b
 
 type TestM action = Writer [[action]]
 

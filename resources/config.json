@@ -1,0 +1,7 @@
+{
+  "port": 8080,
+  "version": "MISSING",
+  "sqliteFile": "test.db",
+  "jwtKeyPath": "resources/test.key",
+  "insecureAuthCookie": true
+}

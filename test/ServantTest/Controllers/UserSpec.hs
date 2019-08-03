@@ -4,7 +4,7 @@ module ServantTest.Controllers.UserSpec (spec) where
 
 import Test.Hspec
 
-import ServantTest.Test.Helpers
+import ServantTest.Test.Helpers.MockDb
 import qualified ServantTest.Db.User as Db.User
 import ServantTest.Controllers.User
 import ServantTest.Models.User
@@ -13,7 +13,7 @@ spec :: Spec
 spec = do
   describe "listUsers" $ do
     it "should list the users from db" $ do
-      runTest (listUsers id mockDb) `shouldBe` ([mockUser], [[ListUsers]])
+      runTest (listUsers mockDb) `shouldBe` ([mockUser], [[ListUsers]])
   describe "getUser" $ do
     it "should get a user from db if it exists" $ do
       runTest (getUser 7 mockDb)
@@ -25,19 +25,22 @@ spec = do
     it "should insert the new user in the Db and return the full User" $ do
       runTest (createUser mockNewUser mockDb)
         `shouldBe` (mockUser, [[CreateUser mockNewUser]])
-  describe "deleteUser" $ do
-    it "should delete the existing user in the Db and return it" $ do
-      runTest (deleteUser 7 mockDb)
-        `shouldBe` (Just mockUser, [[DeleteUser 7]])
-    it "should attempt to delete a non-existing user, and return nothing" $ do
-      runTest (deleteUser nonExistingId mockDb)
-        `shouldBe` (Nothing, [[DeleteUser nonExistingId]])
+  describe "checkLogin" $ do
+    it "should be Just a user if it is found by its login and the password matches" $ do
+      runTest (checkLogin (LoginInput mockLogin mockPassword) mockDb)
+        `shouldBe` (Just mockUser, [[FindUserByLogin mockLogin]])
+    it "should be Nothing if the user is found by its login, but the password does not match" $ do
+      runTest (checkLogin (LoginInput mockLogin "hahaha") mockDb)
+        `shouldBe` (Nothing, [[FindUserByLogin mockLogin]])
+    it "should be Nothing if the user is not found by its login" $ do
+      runTest (checkLogin (LoginInput "notme@web.com" "hahaha") mockDb)
+        `shouldBe` (Nothing, [[FindUserByLogin "notme@web.com"]])
 
 data UserDbAction = CreateTable
                   | ListUsers
                   | CreateUser NewUser
                   | GetUser Integer
-                  | DeleteUser Integer
+                  | FindUserByLogin Login
                   deriving (Eq, Show)
 
 mockDb :: MockDb UserDbAction
@@ -48,7 +51,10 @@ instance Db.User.UserDb (DbActions UserDbAction) where
   listUsers = DbActions [ListUsers] [mockUser]
   getUser idParam = DbActions [GetUser idParam] $ getMockUser idParam
   createUser newUser = DbActions [CreateUser newUser] mockUser
-  deleteUser idParam = DbActions [DeleteUser idParam] $ getMockUser idParam
+  findUserByLogin login = DbActions [FindUserByLogin login] foundUser
+    where
+      foundUser | login == userLogin mockUser = Just mockUser
+                | otherwise                   = Nothing
 
 nonExistingId :: Integer
 nonExistingId = 99
@@ -58,17 +64,21 @@ getMockUser idParam
   | idParam == nonExistingId = Nothing
   | otherwise                = Just mockUser { userId = idParam }
 
+mockLogin :: Login
+mockLogin = "test@test"
+
+mockPassword :: Password
+mockPassword = "asdqwe"
+
 mockUser :: User
 mockUser = User {
   userId = 7
-, userName = "test"
-, userAge = 25
-, userEmail = "test@test"
+, userLogin = mockLogin
+, userPassword = mockPassword
 }
 
 mockNewUser :: NewUser
 mockNewUser = NewUser {
-  newName = "test"
-, newAge = 25
-, newEmail = "test@test"
+  newLogin = textToLogin "test@test"
+, newPassword = textToPassword "asdqwe"
 }

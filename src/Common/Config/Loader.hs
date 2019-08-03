@@ -6,6 +6,8 @@ module Common.Config.Loader
   , loadFromEnv
   ) where
 
+import Control.Monad (join)
+import Control.Exception (try, displayException, IOException)
 import Data.Aeson
 import Data.Aeson.Types
 import Data.Aeson.Extra.Merge (lodashMerge)
@@ -34,7 +36,9 @@ loadConfigFrom configLoaders = do
     printLoadError msg = putStrLn $ "[Load Config] Load failed: " ++ msg
 
 defaultLoaders :: [ConfigLoader]
-defaultLoaders = [loadFromEnv "SERVICE_CONFIG"]
+defaultLoaders = [loadFromFile "resources/config.json"
+                 ,loadFromEnv "SERVICE_CONFIG"
+                 ]
 
 loadConfig :: FromJSON a => IO a
 loadConfig = loadConfigFrom defaultLoaders >>= orThrow
@@ -48,3 +52,14 @@ loadFromEnv varName = do
       Just envJson -> return . leftToText . eitherDecode . fromString $ envJson
   where leftToText (Right v)  = Right v
         leftToText (Left str) = Left $ T.pack str
+
+loadFromFile :: FilePath -> ConfigLoader
+loadFromFile path = do
+    eitherDecoded <- join . mapLeft (displayException @IOException) <$> decodeFile
+    return $ mapLeft T.pack eitherDecoded
+  where
+    decodeFile :: IO (Either IOException (Either String Value))
+    decodeFile = try $ eitherDecodeFileStrict path
+    mapLeft :: (a -> b) -> Either a c -> Either b c
+    mapLeft _ (Right r) = Right r
+    mapLeft f (Left l) = Left (f l)
