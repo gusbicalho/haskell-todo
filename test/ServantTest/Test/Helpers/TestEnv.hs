@@ -4,7 +4,7 @@ import Control.Monad.Reader
 import System.IO.Temp as Temp (emptySystemTempFile)
 import Servant
 import Servant.Auth.Server as SAS
-import Common.Auth.Types as AT
+import ServantTest.Auth.WireTypes
 import qualified ServantTest.Env as Env
 import qualified ServantTest.Config as Config
 import qualified ServantTest.HttpApi as HttpApi
@@ -40,12 +40,12 @@ testEnvApp transEnv prepare = do
 testApp :: (Env.Env -> IO ()) -> IO Application
 testApp prepare = snd <$> testEnvApp id prepare
 
-loginAsUser :: Integer -> IO (AuthResult AT.AuthTokenClaims)
+loginAsUser :: Integer -> IO (AuthResult IdentityTokenClaims)
 loginAsUser userId = return $ SAS.Authenticated claims
   where
-    claims = AT.AuthTokenClaims {
-      AT.identity = AT.Known $ AT.User {
-        AT.userId = userId
+    claims = AuthTokenClaims {
+      identity = Known $ User {
+        userId = userId
       }
     }
 

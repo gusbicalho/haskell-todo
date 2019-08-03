@@ -12,6 +12,7 @@ module Common.Auth.HttpApi
 
 import Control.Monad.Except
 import Control.Monad.Reader
+import Data.Aeson
 import Data.ByteString.Lazy.Char8 as BS
 import qualified Data.Text as T
 import Servant
@@ -28,16 +29,16 @@ type APIContext = '[ JWTSettings
                    , CookieSettings
                    ]
 
-type AuthenticatedAPI api = Auth '[JWT] AT.AuthTokenClaims :> api
+type AuthenticatedAPI identity api = Auth '[JWT] (AT.AuthTokenClaims identity) :> api
 
 apiContext :: APIContextConstraints env => env -> Context APIContext
 apiContext env = #jwtSettings env
               :. #cookieSettings env
               :. EmptyContext
 
-type AuthenticationAPI = (
-         ReqBody '[JSON] AT.LoginInput :> Put '[JSON] AT.LoginReturn
-    :<|> ReqBody '[JSON] AT.LoginInput :> Post '[JSON] AT.LoginReturn
+type AuthenticationAPI input identity = (
+         ReqBody '[JSON] input :> Put '[JSON] (AT.LoginReturn identity)
+    :<|> ReqBody '[JSON] input :> Post '[JSON] (AT.LoginReturn identity)
   )
 
 type ServerConstraints m env = ( APIContextConstraints env
@@ -46,7 +47,9 @@ type ServerConstraints m env = ( APIContextConstraints env
                                , MonadReader env m
                                )
 
-server :: ServerConstraints m env => (env -> AT.LoginInput -> m (Maybe AT.Identity)) -> ServerT AuthenticationAPI m
+server :: (ServerConstraints m env, ToJSON identity)
+          => (env -> input -> m (Maybe identity))
+          -> ServerT (AuthenticationAPI input identity) m
 server authFn = login :<|> login
   where -- Handlers
     login input = do

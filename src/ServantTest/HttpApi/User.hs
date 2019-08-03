@@ -9,8 +9,8 @@ import Control.Monad.Except
 import Control.Monad.Reader
 import Servant
 import Servant.Auth.Server
-import qualified Common.Auth.Types as AT
-import qualified Common.Auth.Logic as Auth.Logic
+import ServantTest.Auth.WireTypes (IdentityTokenClaims)
+import qualified ServantTest.Auth.Logic as Auth.Logic
 import qualified ServantTest.Env as Env
 import qualified ServantTest.WireTypes.User as Wire.User
 import qualified ServantTest.Controllers.User as C.User
@@ -34,7 +34,7 @@ type ServerConstraints m = ( MonadError ServantErr m
                            , MonadReader Env.Env m
                            )
 
-server :: ServerConstraints m => AuthResult AT.AuthTokenClaims -> ServerT API m
+server :: ServerConstraints m => AuthResult IdentityTokenClaims -> ServerT API m
 server auth = listUsers
          :<|> createUser
          :<|> getUser

@@ -12,7 +12,7 @@ import qualified ServantTest.Config as Config
 import qualified ServantTest.Env as Env
 import qualified Common.Version.Server as Version
 import qualified ServantTest.HttpApi.Static as Static
-import qualified ServantTest.HttpApi.Auth as Auth
+import qualified ServantTest.Auth.HttpApi as Auth
 import qualified ServantTest.HttpApi.User as User
 import qualified ServantTest.HttpApi.Item as Item
 

@@ -14,7 +14,7 @@ import Servant.Auth.Server as SAS
 import Control.Monad.Reader
 
 import qualified ServantTest.Env as Env
-import Common.Auth.Types as AT
+import ServantTest.Auth.WireTypes
 import ServantTest.Db.Transactor (Transactor(..))
 import qualified ServantTest.Db.User as Db.User
 import ServantTest.Models.User
@@ -38,7 +38,7 @@ prepareDb env = do
                         , newPassword = "swordfish"
                         }
 
-app :: (Env.Env -> IO (AuthResult AT.AuthTokenClaims)) -> IO Application
+app :: (Env.Env -> IO (AuthResult IdentityTokenClaims)) -> IO Application
 app authenticate = do
     env <- testEnv id prepareDb
     auth <- authenticate env

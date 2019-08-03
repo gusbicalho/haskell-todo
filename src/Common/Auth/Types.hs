@@ -10,42 +10,24 @@ import Data.Text (Text)
 import Control.Applicative
 import Common.Util.AesonHelpers
 
-newtype Scope = Scope Text deriving (Eq, Show)
-$(deriveJSON defaultOptions ''Scope)
-instance ToJWT Scope
-instance FromJWT Scope
-
-data Identity = User  { userId :: Integer
-                      }
-              | Admin { adminId :: Text
-                      , scopes :: [Scope]
-                      }
+data Extensible known = Known known
+                      | Other Value
   deriving (Eq, Show, Generic)
-$(deriveJSON defaultOptions ''Identity)
-instance ToJWT Identity
-instance FromJWT Identity
-
-data ExtensibleIdentity = Known Identity
-                        | Other Value
-  deriving (Eq, Show, Generic)
-instance ToJSON ExtensibleIdentity where
-  toJSON (Known identity) = toJSON identity
-  toJSON (Other value)    = toJSON value
-instance FromJSON ExtensibleIdentity where
+instance ToJSON known => ToJSON (Extensible known) where
+  toJSON (Known known) = toJSON known
+  toJSON (Other value) = toJSON value
+instance FromJSON known => FromJSON (Extensible  known) where
   parseJSON val = Known <$> parseJSON val
               <|> (pure $ Other val)
-instance ToJWT ExtensibleIdentity
-instance FromJWT ExtensibleIdentity
+instance ToJSON known => ToJWT (Extensible known)
+instance FromJSON known => FromJWT (Extensible known)
 
-data AuthTokenClaims = AuthTokenClaims {
-  identity :: ExtensibleIdentity
-} deriving (Eq, Show, Generic)
+data AuthTokenClaims identity = AuthTokenClaims {
+  identity :: Extensible identity
+} deriving (Eq, Show)
 $(deriveJSON defaultOptions ''AuthTokenClaims)
-instance ToJWT AuthTokenClaims
-instance FromJWT AuthTokenClaims
+instance ToJSON identity => ToJWT (AuthTokenClaims identity)
+instance FromJSON identity => FromJWT (AuthTokenClaims identity)
 
-data LoginReturn = LoginReturn { return_identity :: Identity, return_token :: Text } deriving (Eq, Show)
+data LoginReturn identity = LoginReturn { return_identity :: identity, return_token :: Text } deriving (Eq, Show)
 $(deriveJSON defaultOptions { fieldLabelModifier = dropPrefix_ } ''LoginReturn)
-
-data LoginInput = LoginInput { input_username :: Text, input_password :: Text } deriving (Eq, Show)
-$(deriveJSON defaultOptions { fieldLabelModifier = dropPrefix_ } ''LoginInput)

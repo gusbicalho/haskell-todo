@@ -4,8 +4,8 @@ import Control.Monad.Except
 import Control.Monad.Reader
 import Servant
 import Servant.Auth.Server
-import qualified Common.Auth.Types as AT
-import qualified Common.Auth.Logic as Auth.Logic
+import ServantTest.Auth.WireTypes (IdentityTokenClaims)
+import qualified ServantTest.Auth.Logic as Auth.Logic
 import ServantTest.Env
 import qualified ServantTest.WireTypes.Item as Wire.Item
 import qualified ServantTest.Controllers.Item as C.Item
@@ -30,7 +30,7 @@ justOr404 :: MonadError ServantErr m => Maybe a -> m a
 justOr404 Nothing     = throwError err404
 justOr404 (Just item) = return item
 
-server :: ServerConstraints m => AuthResult AT.AuthTokenClaims -> ServerT API m
+server :: ServerConstraints m => AuthResult IdentityTokenClaims -> ServerT API m
 server (Auth.Logic.authenticatedUserId -> Just userId) =
          createItem
     :<|> \itemIdParam -> getItem itemIdParam
