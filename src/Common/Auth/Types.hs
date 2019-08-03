@@ -8,6 +8,7 @@ import Data.Aeson.TH
 import Servant.Auth.Server
 import Data.Text (Text)
 import Control.Applicative
+import Common.Util.AesonHelpers
 
 newtype Scope = Scope Text deriving (Eq, Show)
 $(deriveJSON defaultOptions ''Scope)
@@ -43,7 +44,8 @@ $(deriveJSON defaultOptions ''AuthTokenClaims)
 instance ToJWT AuthTokenClaims
 instance FromJWT AuthTokenClaims
 
-type instance BasicAuthCfg = BasicAuthData -> IO (AuthResult AuthTokenClaims)
+data LoginReturn = LoginReturn { return_identity :: Identity, return_token :: Text } deriving (Eq, Show)
+$(deriveJSON defaultOptions { fieldLabelModifier = dropPrefix_ } ''LoginReturn)
 
-instance FromBasicAuthData AuthTokenClaims where
-  fromBasicAuthData authData authCheckFunction = authCheckFunction authData
+data LoginInput = LoginInput { input_username :: Text, input_password :: Text } deriving (Eq, Show)
+$(deriveJSON defaultOptions { fieldLabelModifier = dropPrefix_ } ''LoginInput)

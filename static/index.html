@@ -209,10 +209,11 @@
 
       async function doLogin(login, password) {
         let headers = new Headers()
-        headers.set('Authorization', 'Basic ' + btoa(login + ":" + password))
+        headers.set('content-type', 'application/json')
         return fetch('/api/auth/user', {
           method: 'post',
           headers,
+          body: JSON.stringify({ username: login, password }),
           credentials: 'same-origin',
         }).then((response) =>
           response.status === 200
