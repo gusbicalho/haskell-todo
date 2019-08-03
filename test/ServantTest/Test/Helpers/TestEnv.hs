@@ -4,7 +4,8 @@ import Control.Monad.Reader
 import System.IO.Temp as Temp (emptySystemTempFile)
 import Servant
 import Servant.Auth.Server as SAS
-import ServantTest.Auth.WireTypes
+import Common.Auth (AuthTokenClaims (..), Extensible (Known))
+import ServantTest.Auth.Types
 import qualified ServantTest.Env as Env
 import qualified ServantTest.Config as Config
 import qualified ServantTest.HttpApi as HttpApi

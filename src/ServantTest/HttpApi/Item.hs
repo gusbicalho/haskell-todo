@@ -4,7 +4,7 @@ import Control.Monad.Except
 import Control.Monad.Reader
 import Servant
 import Servant.Auth.Server
-import ServantTest.Auth.WireTypes (IdentityTokenClaims)
+import ServantTest.Auth.Types (IdentityTokenClaims)
 import qualified ServantTest.Auth.Logic as Auth.Logic
 import ServantTest.Env
 import qualified ServantTest.WireTypes.Item as Wire.Item

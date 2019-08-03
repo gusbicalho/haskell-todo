@@ -2,7 +2,7 @@ module ServantTest.Auth.Adapters where
 
 import Data.String (fromString)
 import qualified Data.Text as T
-import qualified ServantTest.Auth.WireTypes as Wire
+import qualified ServantTest.Auth.Types as Wire
 import qualified ServantTest.Models.User as M.User
 
 wireToLoginInput :: Wire.LoginInput -> M.User.LoginInput

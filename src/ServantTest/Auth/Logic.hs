@@ -1,7 +1,8 @@
 module ServantTest.Auth.Logic where
 
 import Servant.Auth.Server
-import ServantTest.Auth.WireTypes
+import Common.Auth
+import ServantTest.Auth.Types
 
 knownIdentity :: IdentityTokenClaims -> Maybe Identity
 knownIdentity AuthTokenClaims { identity = Known identity } = Just identity
