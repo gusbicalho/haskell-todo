@@ -1,4 +1,9 @@
-module ServantTest.Adapters.User where
+module ServantTest.Adapters.User
+  ( toWire
+  , singleWire
+  , manyWire
+  , inputToNewUser
+  ) where
 
 import Prelude hiding (id)
 import qualified ServantTest.Models.User as Internal
@@ -16,4 +21,4 @@ manyWire = Wire.ManyUsers . map toWire
 
 inputToNewUser :: Wire.NewUserInput -> Internal.NewUser
 inputToNewUser (Wire.NewUserInput login password) =
-                Internal.NewUser (Internal.textToLogin login) (Internal.textToPassword password)
+  Internal.NewUser (Internal.textToLogin login) (Internal.textToPassword password)

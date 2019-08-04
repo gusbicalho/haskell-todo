@@ -108,6 +108,7 @@ tests:
     - hspec
     - hspec-wai
     - hspec-wai-json
+    - QuickCheck
     - wai
     - wai-extra
     - warp

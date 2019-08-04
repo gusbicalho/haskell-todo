@@ -5,7 +5,7 @@
 module Common.Auth.HttpApiSpec (spec) where
 
 import Test.Hspec
-import Test.Hspec.Wai hiding (pendingWith)
+import Test.Hspec.Wai
 import Test.Hspec.Wai.JSON
 
 import Data.Aeson hiding (json)

@@ -10,7 +10,7 @@ data ItemState = ToDo
                | Blocked
                | InProgress
                | Done
-  deriving (Eq, Show)
+  deriving (Eq, Show, Bounded, Enum, Read)
 $(deriveJSON defaultOptions ''ItemState)
 
 data Item = Item {

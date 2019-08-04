@@ -15,7 +15,7 @@ data ItemState = ToDo
                | Blocked
                | InProgress
                | Done
-  deriving (Eq, Show)
+  deriving (Eq, Show, Enum, Bounded, Read)
 
 newtype Title = Title { titleToText :: T.Text } deriving (Eq, Show)
 
@@ -43,4 +43,4 @@ data ItemUpdate = ItemUpdate {
 , updateTitle :: Maybe Title
 , updateState :: Maybe ItemState
 , updateUserId :: Integer
-}
+} deriving (Eq, Show)

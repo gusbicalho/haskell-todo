@@ -1,4 +1,12 @@
-module ServantTest.Adapters.Item where
+module ServantTest.Adapters.Item
+  ( toWire
+  , manyWire
+  , singleWire
+  , inputToNewItem
+  , inputToItemUpdate
+  , toWireState
+  , toInternalState
+  ) where
 
 import ServantTest.Models.Item as Internal
 import ServantTest.WireTypes.Item as Wire
@@ -29,15 +37,8 @@ inputToItemUpdate itemId userId (Wire.ItemUpdateInput titleText wireState) =
                       (toInternalState <$> wireState)
                       userId
 
--- TODO find a better way - maybe use (read . show) + QuickChekc
 toWireState :: Internal.ItemState -> Wire.ItemState
-toWireState Internal.ToDo       = Wire.ToDo
-toWireState Internal.Blocked    = Wire.Blocked
-toWireState Internal.InProgress = Wire.InProgress
-toWireState Internal.Done       = Wire.Done
+toWireState = read . show
 
 toInternalState :: Wire.ItemState -> Internal.ItemState
-toInternalState Wire.ToDo       = Internal.ToDo
-toInternalState Wire.Blocked    = Internal.Blocked
-toInternalState Wire.InProgress = Internal.InProgress
-toInternalState Wire.Done       = Internal.Done
+toInternalState = read . show
