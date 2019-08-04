@@ -1,4 +1,4 @@
-module ServantTest.Db.SQLite
+module Common.Db.SQLite
   ( sqliteDb
   , SqliteDb (..)
   , SQLiteAction(..)
@@ -6,7 +6,7 @@ module ServantTest.Db.SQLite
 
 import Control.Monad.IO.Class
 import Database.SQLite.Simple
-import ServantTest.Db.Transactor
+import Common.Db.Transactor
 
 newtype SqliteDb = SqliteDb FilePath
 

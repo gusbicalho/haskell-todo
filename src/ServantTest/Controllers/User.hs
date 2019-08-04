@@ -4,7 +4,7 @@ module ServantTest.Controllers.User where
 
 import Control.Monad
 import Common.HasVal.Class
-import ServantTest.Db.Transactor (Transactor(..))
+import Common.Db.Transactor (Transactor(..))
 import ServantTest.Models.User (User(..), NewUser(..), LoginInput (..))
 import ServantTest.Db.User as Db.User
 

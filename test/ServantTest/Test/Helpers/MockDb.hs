@@ -2,7 +2,7 @@ module ServantTest.Test.Helpers.MockDb where
 
 import Control.Monad.Writer
 import Common.HasVal.Class
-import ServantTest.Db.Transactor (Transactor(..))
+import Common.Db.Transactor (Transactor(..))
 
 data MockDb action = MockDb
 

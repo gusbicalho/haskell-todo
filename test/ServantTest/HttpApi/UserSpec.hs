@@ -15,7 +15,7 @@ import Control.Monad.Reader
 
 import qualified ServantTest.Env as Env
 import ServantTest.Auth.Types
-import ServantTest.Db.Transactor (Transactor(..))
+import Common.Db.Transactor (Transactor(..))
 import qualified ServantTest.Db.User as Db.User
 import ServantTest.Models.User
 import ServantTest.HttpApi.User (api, server)

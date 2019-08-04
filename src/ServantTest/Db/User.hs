@@ -9,7 +9,7 @@ import Data.Maybe (fromJust, listToMaybe)
 import Data.String (fromString)
 import Database.SQLite.Simple
 
-import ServantTest.Db.SQLite
+import Common.Db.SQLite
 import qualified ServantTest.Models.User as M.User
 import ServantTest.Models.User ( User(..)
                                , NewUser(..)

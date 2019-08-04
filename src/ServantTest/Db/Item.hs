@@ -9,7 +9,7 @@ import Database.SQLite.Simple.FromField
 import Database.SQLite.Simple.ToField
 
 import ServantTest.Models.Item
-import ServantTest.Db.SQLite
+import Common.Db.SQLite
 
 class ItemDb action where
   initDB :: action ()

@@ -3,7 +3,7 @@
 module ServantTest.Controllers.Item where
 
 import Common.HasVal.Class
-import ServantTest.Db.Transactor (Transactor(..))
+import Common.Db.Transactor (Transactor(..))
 import ServantTest.Models.Item
 import qualified ServantTest.Db.Item as Db.Item
 

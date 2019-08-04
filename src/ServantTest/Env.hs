@@ -6,8 +6,8 @@ import Servant.Auth.Server
 import Network.Wai.Handler.Warp (Port)
 import Common.Version.Class (HasVal(..), Version)
 import ServantTest.Config (Config(..))
-import ServantTest.Db.Transactor (Transactor (..))
-import ServantTest.Db.SQLite (SqliteDb, sqliteDb)
+import Common.Db.Transactor (Transactor (..))
+import Common.Db.SQLite (SqliteDb, sqliteDb)
 import qualified ServantTest.Db.User as Db.User
 import qualified ServantTest.Db.Item as Db.Item
 
