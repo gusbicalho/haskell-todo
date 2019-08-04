@@ -20,7 +20,7 @@ import qualified ServantTest.Db.User as Db.User
 import ServantTest.Models.User
 import ServantTest.HttpApi.User (api, server)
 
-import ServantTest.Test.Helpers.Wai
+import Common.Test.Helpers.Wai
 import ServantTest.Test.Helpers.TestEnv
 
 prepareDb :: Env.Env -> IO ()
