@@ -29,6 +29,9 @@ instance HasVal "config" Config Config where
 instance HasVal "version" Config Version where
   getVal = fromText . version
 
+instance HasVal "port" Config Port where
+  getVal = port
+
 $(deriveJSON defaultOptions ''Config)
 
 type API = CS.API Config
