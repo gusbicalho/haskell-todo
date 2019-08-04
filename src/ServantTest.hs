@@ -13,12 +13,6 @@ import qualified ServantTest.Config as Config
 import qualified ServantTest.Env as Env
 import qualified ServantTest.HttpApi as HttpApi
 
-withSettingsFromEnv :: Env.Env -> (Settings -> IO a) -> IO a
-withSettingsFromEnv env actionFn = withStdoutLogger $ \aplogger ->
-    actionFn $ setPort (Config.port $ #config env)
-             . setLogger aplogger
-             $ defaultSettings
-
 startApp :: IO ()
 startApp = do
   config <- Config.loadConfig
@@ -29,11 +23,18 @@ type ReadEnvT m = ReaderT Env.Env m
 
 type AppM = ReadEnvT Handler
 
+withSettingsFromEnv :: Env.Env -> (Settings -> IO a) -> IO a
+withSettingsFromEnv env actionFn = withStdoutLogger $ \aplogger ->
+    actionFn $ setPort (Config.port $ #config env)
+             . setLogger aplogger
+             $ defaultSettings
+
 startHttpApi :: Env.Env -> IO ()
-startHttpApi env = withSettingsFromEnv env $ \settings -> do
+startHttpApi env = do
     let port = #port . #config $ env
     putStrLn $ "Server running at port " ++ show port
-    runSettings settings (HttpApi.app env provideDependencies)
+    withSettingsFromEnv env $ \settings ->
+      runSettings settings (HttpApi.app env provideDependencies)
   where
     provideDependencies :: AppM x -> Handler x
     provideDependencies m = runReaderT m env

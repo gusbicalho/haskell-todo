@@ -4,6 +4,7 @@ module Common.Config.Loader
   , defaultLoaders
   , loadConfig
   , loadFromEnv
+  , loadFromFile
   ) where
 
 import Control.Monad (join)
@@ -47,19 +48,23 @@ loadConfig = loadConfigFrom defaultLoaders >>= orThrow
 loadFromEnv :: T.Text -> ConfigLoader
 loadFromEnv varName = do
     env <- lookupEnv $ T.unpack varName
-    case env of
-      Nothing -> return . Left $ T.concat ["Env var ", varName, " not found."]
-      Just envJson -> return . leftToText . eitherDecode . fromString $ envJson
-  where leftToText (Right v)  = Right v
-        leftToText (Left str) = Left $ T.pack str
+    return . mapLeft withPrefix $
+      case env of
+        Nothing -> Left $ T.concat ["Env var ", varName, " not found."]
+        Just envJson -> mapLeft T.pack . eitherDecode . fromString $ envJson
+  where
+    withPrefix errorMsg = "Loading env " <> varName <> ": " <> errorMsg
 
 loadFromFile :: FilePath -> ConfigLoader
 loadFromFile path = do
     eitherDecoded <- join . mapLeft (displayException @IOException) <$> decodeFile
-    return $ mapLeft T.pack eitherDecoded
+    return $ mapLeft (T.pack . withPrefix) eitherDecoded
   where
     decodeFile :: IO (Either IOException (Either String Value))
     decodeFile = try $ eitherDecodeFileStrict path
-    mapLeft :: (a -> b) -> Either a c -> Either b c
-    mapLeft _ (Right r) = Right r
-    mapLeft f (Left l) = Left (f l)
+    withPrefix :: String -> String
+    withPrefix errorMsg = "Loading file " <> path <> ": " <> errorMsg
+
+mapLeft :: (a -> b) -> Either a c -> Either b c
+mapLeft _ (Right r) = Right r
+mapLeft f (Left l) = Left (f l)
