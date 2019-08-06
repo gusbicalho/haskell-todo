@@ -70,7 +70,7 @@ mockEnv = MockEnv
 instance Db.Item.ItemDb (DbActions ItemDbAction) where
   initDB = DbActions [CreateTable] ()
   getItem idParam = DbActions [GetItem idParam] $ getMockItem idParam
-  createItem newItem = DbActions [CreateItem newItem] $ mockItem
+  createItem newItem = DbActions [CreateItem newItem] mockItem
   updateItem item = DbActions [UpdateItem item] $ getMockItem (itemId item) $> item
   findItemsByUserId userId = DbActions [FindItemsByUserId userId] [mockItem { itemUserId = userId }]
   deleteItem itemId = DbActions [DeleteItem itemId] $ getMockItem itemId

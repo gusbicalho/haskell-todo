@@ -64,7 +64,7 @@ createItem' newItem conn = do
   fromJust <$> getItem' (fromIntegral rowId) conn
 
 updateItem' :: Item -> Connection -> IO (Maybe Item)
-updateItem' (Item { itemId, itemUserId, itemTitle, itemState }) conn = do
+updateItem' Item { itemId, itemUserId, itemTitle, itemState } conn = do
   maybeItem <- getItem' itemId conn
   case maybeItem of
     Nothing -> return Nothing
@@ -110,8 +110,8 @@ instance FromRow DbItem where
   fromRow = DbItem <$> item
     where item = Item <$> itemId <*> title <*> state <*> userId
           itemId = field
-          title = (textToTitle <$> field)
-          state = (dbToItemState <$> field)
+          title = textToTitle <$> field
+          state = dbToItemState <$> field
           userId = field
 
 instance ToRow DbNewItem where

@@ -32,8 +32,8 @@ instance FromRow DbUser where
   fromRow = DbUser <$> user
     where user = User <$> id <*> login <*> password
           id = field
-          login = (textToLogin <$> field)
-          password = (textToPassword <$> field)
+          login = textToLogin <$> field
+          password = textToPassword <$> field
 
 newtype DbNewUser = DbNewUser NewUser
 instance ToRow DbNewUser where

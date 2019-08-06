@@ -42,7 +42,7 @@ api = Proxy
 type ServerConstraints m c = (HasVal "config" c Config, CS.ServerConstraints m c)
 
 server :: ServerConstraints m c => ServerT API m
-server = asks $ #config
+server = asks #config
 
 loadConfig :: IO Config
 loadConfig = CL.loadConfig

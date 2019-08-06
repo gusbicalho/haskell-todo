@@ -1,3 +1,4 @@
+{- HLINT ignore "Redundant do" -}
 module Common.Util.AesonHelpersSpec (spec) where
 
 import Test.Hspec

@@ -29,20 +29,21 @@ getItemBelongingToUserId itemIdParam userIdParam env = do
     return $ maybeItem >>= guardMatchingUser userIdParam
 
 updateItem :: ControllerConstraints env t m action => ItemUpdate -> env -> m (Maybe Item)
-updateItem (ItemUpdate { updateId, updateUserId, updateTitle, updateState }) env = do
+updateItem ItemUpdate { updateId, updateUserId, updateTitle, updateState } env =
     transact (#transactor env) $ do
       maybeItem <- Db.Item.getItem updateId
       case guardMatchingUser updateUserId =<< maybeItem of
-        Nothing -> return Nothing
-        Just item -> do
-          Db.Item.updateItem . updatingTitle updateTitle . updatingState updateState $ item
+        Nothing   -> return Nothing
+        Just item -> Db.Item.updateItem $ updatingTitle updateTitle
+                                        . updatingState updateState
+                                        $ item
   where updatingTitle Nothing         item = item
         updatingTitle (Just newTitle) item = item { itemTitle = newTitle }
         updatingState Nothing         item = item
         updatingState (Just newState) item = item { itemState = newState }
 
 deleteItemBelongingToUserId :: ControllerConstraints env t m action => Integer -> Integer -> env -> m (Maybe Item)
-deleteItemBelongingToUserId itemIdParam userIdParam env = do
+deleteItemBelongingToUserId itemIdParam userIdParam env =
     transact (#transactor env) $ do
       maybeItem <- Db.Item.getItem itemIdParam
       case guardMatchingUser userIdParam =<< maybeItem of

@@ -22,9 +22,8 @@ import qualified HaskellTodo.Adapters.Item as A.Item
 type API = Get '[JSON] Wire.User.ManyUsers
       :<|> ReqBody '[JSON] Wire.User.NewUserInput :> Post '[JSON] Wire.User.SingleUser
       :<|> Capture "userid" Integer :> Get '[JSON] Wire.User.SingleUser
-      :<|> Capture "userid" Integer :> "items" :> (
+      :<|> Capture "userid" Integer :> "items" :>
         Get '[JSON] Wire.Item.ManyItems
-      )
 
 api :: Proxy API
 api = Proxy

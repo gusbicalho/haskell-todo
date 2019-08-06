@@ -18,11 +18,11 @@ instance ToJSON known => ToJSON (Extensible known) where
   toJSON (Other value) = toJSON value
 instance FromJSON known => FromJSON (Extensible  known) where
   parseJSON val = Known <$> parseJSON val
-              <|> (pure $ Other val)
+              <|> pure (Other val)
 instance ToJSON known => ToJWT (Extensible known)
 instance FromJSON known => FromJWT (Extensible known)
 
-data AuthTokenClaims identity = AuthTokenClaims {
+newtype AuthTokenClaims identity = AuthTokenClaims {
   identity :: Extensible identity
 } deriving (Eq, Show)
 $(deriveJSON defaultOptions ''AuthTokenClaims)

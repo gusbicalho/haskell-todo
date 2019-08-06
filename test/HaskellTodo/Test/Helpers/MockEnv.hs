@@ -19,11 +19,11 @@ instance Functor (DbActions action) where
   fmap f (DbActions actions a) = DbActions actions (f a)
 
 instance Applicative (DbActions action) where
-  pure a = DbActions [] a
+  pure = DbActions []
   (DbActions actionsF f) <*> (DbActions actionsA a) = DbActions (actionsF <> actionsA) (f a)
 
 instance Monad (DbActions action) where
-  return a = DbActions [] a
+  return = DbActions []
   (DbActions actions a) >>= f = let DbActions moreActions b = f a
                                 in DbActions (actions <> moreActions) b
 

@@ -43,16 +43,14 @@ type API =
 
 server :: ServerConstraints m a => ServerT API m
 server =
-  ( -- /ops
-    Config.server
-  )
+  -- /ops
+  Config.server
   :<|> ( -- /api
          Version.server
     :<|> Auth.authenticationServer
-    :<|> \auth -> (
+    :<|> \auth ->
            User.server auth
       :<|> Item.server auth
-    )
   )
   :<|> -- static files
   Static.server

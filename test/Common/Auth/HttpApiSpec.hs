@@ -19,7 +19,7 @@ import Common.HasVal.Class
 import Common.Auth.HttpApi as HttpApi
 import Common.Test.Helpers.Wai
 
-data MockEnv = MockEnv JWTSettings
+newtype MockEnv = MockEnv JWTSettings
 instance HasVal "cookieSettings" MockEnv CookieSettings where
   getVal _ = defaultCookieSettings
 instance HasVal "jwtSettings" MockEnv JWTSettings where

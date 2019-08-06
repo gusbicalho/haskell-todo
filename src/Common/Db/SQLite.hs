@@ -31,3 +31,6 @@ instance Monad SQLiteAction where
 
 instance MonadIO transactionM => Transactor SqliteDb transactionM SQLiteAction where
   transact (SqliteDb dbfile) (SQLiteAction act) = liftIO $ withConnection dbfile $ \conn -> withTransaction conn (act conn)
+
+instance MonadIO SQLiteAction where
+  liftIO ioAction = SQLiteAction $ const ioAction
