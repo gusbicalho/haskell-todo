@@ -1,6 +1,6 @@
 module Main where
 
-import ServantTest
+import HaskellTodo
 
 main :: IO ()
 main = startApp
