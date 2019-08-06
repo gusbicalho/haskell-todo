@@ -19,6 +19,6 @@ singleWire = Wire.SingleUser . toWire
 manyWire :: [Internal.User] -> Wire.ManyUsers
 manyWire = Wire.ManyUsers . map toWire
 
-inputToNewUser :: Wire.NewUserInput -> Internal.NewUser
+inputToNewUser :: Wire.NewUserInput -> Internal.NewPlainUser
 inputToNewUser (Wire.NewUserInput login password) =
-  Internal.NewUser (Internal.textToLogin login) (Internal.textToPassword password)
+  Internal.NewPlainUser (Internal.textToLogin login) (Internal.textToPlainPassword password)

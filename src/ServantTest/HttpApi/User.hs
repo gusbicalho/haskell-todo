@@ -49,8 +49,10 @@ server auth = listUsers
       | Auth.Logic.authenticated auth = throwError err403
       | otherwise = do
           env <- ask
-          user <- C.User.createUser (A.User.inputToNewUser newUserInput) env
-          return $ A.User.singleWire user
+          maybeUser <- C.User.createUser (A.User.inputToNewUser newUserInput) env
+          case maybeUser of
+            Nothing -> throwError err500
+            Just user -> return $ A.User.singleWire user
 
     getUser idParam
       | not $ Auth.Logic.authenticatedAsUser idParam auth = throwError err403

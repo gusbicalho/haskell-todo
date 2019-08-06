@@ -4,6 +4,8 @@ module ServantTest.Env where
 
 import Servant.Auth.Server
 import Network.Wai.Handler.Warp (Port)
+import Crypto.BCrypt
+import Common.Crypto.BCrypt
 import Common.Version.Class (HasVal(..), Version)
 import ServantTest.Config (Config(..))
 import Common.Db.Transactor (Transactor (..))
@@ -16,6 +18,7 @@ data Env = Env {
 , sqlite :: SqliteDb
 , jwtSettings :: JWTSettings
 , cookieSettings :: CookieSettings
+, bcrypt :: BCrypter
 }
 
 instance HasVal "transactor" Env SqliteDb where
@@ -36,6 +39,9 @@ instance HasVal "cookieSettings" Env CookieSettings where
 instance HasVal "port" Env Port where
   getVal = port . config
 
+instance HasVal "hasher" Env BCrypter where
+  getVal = bcrypt
+
 cookieSettingsFromConfig :: Config -> CookieSettings
 cookieSettingsFromConfig config =
     defaultCookieSettings { cookieIsSecure
@@ -51,6 +57,7 @@ buildEnv config = do
   jwtKey <- readKey $ jwtKeyPath config
   let jwtSettings = defaultJWTSettings jwtKey
       cookieSettings = cookieSettingsFromConfig config
+      bcrypt = BCrypter { bcryptPolicy = slowerBcryptHashingPolicy }
   transact sqlite Db.User.initDB
   transact sqlite Db.Item.initDB
   return Env {
@@ -58,4 +65,5 @@ buildEnv config = do
   , sqlite
   , jwtSettings
   , cookieSettings
+  , bcrypt
   }

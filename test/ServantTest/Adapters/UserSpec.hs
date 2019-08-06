@@ -25,4 +25,4 @@ spec = do
     internalUser = M.User.User 42 "foo" "bar"
     wireUser = Wire.User.User 42 "foo"
     newUserInput = Wire.User.NewUserInput "foo" "bar"
-    internalNewUser = M.User.NewUser "foo" "bar"
+    internalNewUser = M.User.NewPlainUser "foo" "bar"

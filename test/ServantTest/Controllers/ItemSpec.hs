@@ -5,7 +5,7 @@ module ServantTest.Controllers.ItemSpec (spec) where
 import Test.Hspec
 
 import Data.Functor (($>))
-import ServantTest.Test.Helpers.MockDb
+import ServantTest.Test.Helpers.MockEnv
 import qualified ServantTest.Db.Item as Db.Item
 import ServantTest.Controllers.Item
 import ServantTest.Models.Item
@@ -14,46 +14,46 @@ spec :: Spec
 spec = do
   describe "findItemsByUserId" $ do
     it "should query db and return items belonging to user" $
-      runTest (findItemsByUserId existingItemUserId mockDb)
+      runTest (findItemsByUserId existingItemUserId mockEnv)
       `shouldBe` ([mockItem], [[FindItemsByUserId existingItemUserId]])
   describe "getItem" $ do
     it "should query db and return and item with specified id" $
-      runTest (getItem existingItemId mockDb)
+      runTest (getItem existingItemId mockEnv)
       `shouldBe` (Just mockItem, [[GetItem existingItemId]])
     it "should return Nothing if no item exist with that id" $
-      runTest (getItem 123 mockDb)
+      runTest (getItem 123 mockEnv)
       `shouldBe` (Nothing, [[GetItem 123]])
   describe "getItemBelongingToUserId" $ do
     it "should query db and return and item with specified id, if it belongs to user" $
-      runTest (getItemBelongingToUserId existingItemId existingItemUserId mockDb)
+      runTest (getItemBelongingToUserId existingItemId existingItemUserId mockEnv)
       `shouldBe` (Just mockItem, [[GetItem existingItemId]])
     it "should return Nothing, if the Item does not belong to user" $
-      runTest (getItemBelongingToUserId existingItemId 456 mockDb)
+      runTest (getItemBelongingToUserId existingItemId 456 mockEnv)
       `shouldBe` (Nothing, [[GetItem existingItemId]])
     it "should return Nothing, if the Item does not exist" $
-      runTest (getItemBelongingToUserId 123 existingItemUserId mockDb)
+      runTest (getItemBelongingToUserId 123 existingItemUserId mockEnv)
       `shouldBe` (Nothing, [[GetItem 123]])
   describe "updateItem" $ do
     it "should check if item exists, if so update it in db, and return the updated item" $
-      runTest (updateItem mockItemUpdate mockDb)
+      runTest (updateItem mockItemUpdate mockEnv)
       `shouldBe` (Just mockItemUpdated, [[GetItem existingItemId
                                          ,UpdateItem mockItemUpdated
                                          ]])
     it "should check if item exists, and return Nothing if it does not" $
-      runTest (updateItem (mockItemUpdate { updateId = 123 }) mockDb)
+      runTest (updateItem (mockItemUpdate { updateId = 123 }) mockEnv)
       `shouldBe` (Nothing, [[GetItem 123]])
   describe "deleteItemBelongingToUserId" $ do
     it "should check if item exists, if so delete it in db, and return the deleted item" $
-      runTest (deleteItemBelongingToUserId existingItemId existingItemUserId mockDb)
+      runTest (deleteItemBelongingToUserId existingItemId existingItemUserId mockEnv)
       `shouldBe` (Just mockItem, [[GetItem existingItemId
                                   ,DeleteItem existingItemId
                                   ]])
     it "should check if item exists, and return Nothing if it does not" $
-      runTest (deleteItemBelongingToUserId 123 existingItemUserId mockDb)
+      runTest (deleteItemBelongingToUserId 123 existingItemUserId mockEnv)
       `shouldBe` (Nothing, [[GetItem 123]])
   describe "createItem" $ do
     it "should insert the new Item in the Db and return the full Item" $ do
-      runTest (createItem mockNewItem mockDb)
+      runTest (createItem mockNewItem mockEnv)
         `shouldBe` (mockItem, [[CreateItem mockNewItem]])
 
 data ItemDbAction = CreateTable
@@ -64,8 +64,8 @@ data ItemDbAction = CreateTable
                   | FindItemsByUserId Integer
                   deriving (Eq, Show)
 
-mockDb :: MockDb ItemDbAction
-mockDb = MockDb
+mockEnv :: MockEnv ItemDbAction
+mockEnv = MockEnv
 
 instance Db.Item.ItemDb (DbActions ItemDbAction) where
   initDB = DbActions [CreateTable] ()
