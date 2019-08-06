@@ -1,5 +1,5 @@
 .stack-work/
-servant-test.cabal
+haskell-todo.cabal
 *~
 *.hi
 *.o
