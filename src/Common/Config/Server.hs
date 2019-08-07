@@ -1,3 +1,8 @@
+{-|
+Description: A simple Servant API to get current Config for the service.
+
+A simple Servant API to get current Config for the service.
+-}
 module Common.Config.Server
   ( api
   , server

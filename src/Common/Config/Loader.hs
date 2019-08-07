@@ -1,3 +1,12 @@
+{-|
+Description: Helpers for loading config maps specified as JSON.
+
+This module defines several helpers for reading JSON objects from different
+sources, merging them, and parsing the final result into an application-defined
+type.lookup
+
+Currently, the module exports loaders for files and env vars.
+-}
 module Common.Config.Loader
   ( ConfigLoader
   , loadConfigFrom
@@ -25,6 +34,14 @@ waterfall vs = (mergeAll (rights vs) (object []), lefts vs)
   where
     mergeAll xs acc = foldl' lodashMerge acc xs
 
+{-|
+  Runs several loaders, merges the results, and attempts to parse the resulting
+  JSON object to the desired type. Returns Nothing if the parse fails.
+
+  This action prints the error messages of failed loaders to stdout using
+  @putStrLn@. A nice improvement would be to make a version that accepts a
+  custom logger.
+-}
 loadConfigFrom :: FromJSON a => [ConfigLoader] -> IO (Maybe a)
 loadConfigFrom configLoaders = do
     configs <- sequence configLoaders
