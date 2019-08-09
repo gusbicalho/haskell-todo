@@ -2,12 +2,12 @@
 
 module HaskellTodo.Controllers.Item where
 
-import Common.HasVal.Class
+import Common.HasField
 import Common.Db.Transactor (Transactor(..))
 import HaskellTodo.Models.Item
 import qualified HaskellTodo.Db.Item as Db.Item
 
-type ControllerConstraints env t m action = ( HasVal "transactor" env t
+type ControllerConstraints env t m action = ( HasField "transactor" env t
                                             , Transactor t m action
                                             , Db.Item.ItemDb action
                                             , Monad action

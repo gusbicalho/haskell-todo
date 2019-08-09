@@ -12,7 +12,7 @@ function takes an authentication function and builds a Servant server matching
 the @AuthenticationAPI@.
 
 The AuthenticationAPI requires an environment type that provides Servant
-JWTSettings and CookieSettings, by implementing @Common.HasVal.Class@.
+JWTSettings and CookieSettings, by implementing @Common.HasField.Class@.
 
 The @AuthenticatedAPI@ type constructor wraps a Servant API in a JWT
 authentication combinator.
@@ -20,7 +20,7 @@ authentication combinator.
 Both @AuthenticationAPI@ and @AuthenticatedAPI@ require a Servant context
 that provide JWTSettings and CookieSettings. The exported @apiContext@ function
 can build such a context, given an environment that provides these settings
-via @Common.HasVal.Class@.
+via @Common.HasField.Class@.
 
 I decided to extract all this functionality to @Common@ in order to decouple
 Servant logic from the domain of the authentication service as much as

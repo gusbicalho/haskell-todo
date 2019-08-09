@@ -25,7 +25,7 @@ testEnv transEnv prepare = do
   where
     config sqliteFile = Config.Config {
       Config.port = 8080
-    , Config.version = "testversion"
+    , Config._version = "testversion"
     , Config.sqliteFile = sqliteFile
     , Config.jwtKeyPath = "resources/test/test.key"
     , Config.insecureAuthCookie = True

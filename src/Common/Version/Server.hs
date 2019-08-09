@@ -5,7 +5,7 @@ module Common.Version.Server
   , server
   , API
   , ServerConstraints
-  , HasVal (..)
+  , HasField (..)
   , Version
   ) where
 
@@ -14,7 +14,8 @@ import Control.Monad.Reader
 import Data.Proxy
 import Servant
 import Data.Aeson
-import Common.Version.Class ( HasVal(..), Version, toText )
+import Common.HasField
+import Common.Version.Class ( Version, toText )
 
 newtype WireVersion = WireVersion { version :: Version } deriving (Eq, Show, Generic)
 instance ToJSON WireVersion where
@@ -25,7 +26,7 @@ type API = Get '[JSON] WireVersion
 api :: Proxy API
 api = Proxy
 
-type ServerConstraints m a = (HasVal "version" a Version, MonadReader a m)
+type ServerConstraints m a = (HasField "version" a Version, MonadReader a m)
 
 server :: ServerConstraints m a => ServerT API m
 server = asks $ WireVersion . #version

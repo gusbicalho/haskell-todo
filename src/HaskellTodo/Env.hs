@@ -5,8 +5,9 @@ module HaskellTodo.Env where
 import Servant.Auth.Server
 import Network.Wai.Handler.Warp (Port)
 import Crypto.BCrypt
+import Common.HasField
 import Common.Crypto.BCrypt
-import Common.Version.Class (HasVal(..), Version)
+import Common.Version.Class (Version)
 import HaskellTodo.Config (Config(..))
 import Common.Db.Transactor (Transactor (..))
 import Common.Db.SQLite (SQLiteDb, sqliteDb)
@@ -21,26 +22,17 @@ data Env = Env {
 , bcrypt :: BCrypter
 }
 
-instance HasVal "transactor" Env SQLiteDb where
-  getVal = sqlite
+instance HasField "transactor" Env SQLiteDb where
+  getField = sqlite
 
-instance HasVal "version" Env Version where
-  getVal = #version . config
+instance HasField "version" Env Version where
+  getField = #version . config
 
-instance HasVal "config" Env Config where
-  getVal = config
+instance HasField "port" Env Port where
+  getField = port . config
 
-instance HasVal "jwtSettings" Env JWTSettings where
-  getVal = jwtSettings
-
-instance HasVal "cookieSettings" Env CookieSettings where
-  getVal = cookieSettings
-
-instance HasVal "port" Env Port where
-  getVal = port . config
-
-instance HasVal "hasher" Env BCrypter where
-  getVal = bcrypt
+instance HasField "hasher" Env BCrypter where
+  getField = bcrypt
 
 cookieSettingsFromConfig :: Config -> CookieSettings
 cookieSettingsFromConfig config =

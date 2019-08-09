@@ -14,7 +14,7 @@ function takes an authentication function and builds a Servant server matching
 the @AuthenticationAPI@.
 
 The AuthenticationAPI requires an environment type that provides Servant
-JWTSettings and CookieSettings, by implementing @Common.HasVal.Class@.
+JWTSettings and CookieSettings, by implementing @Common.HasField.Class@.
 
 The @AuthenticatedAPI@ type constructor wraps a Servant API in a JWT
 authentication combinator.
@@ -22,7 +22,7 @@ authentication combinator.
 Both @AuthenticationAPI@ and @AuthenticatedAPI@ require a Servant context
 that provide JWTSettings and CookieSettings. The exported @apiContext@ function
 can build such a context, given an environment that provides these settings
-via @Common.HasVal.Class@.
+via @Common.HasField.Class@.
 -}
 module Common.Auth.HttpApi where
 
@@ -34,15 +34,15 @@ import qualified Data.Text as T
 import Servant
 import Servant.Auth as SA
 import Servant.Auth.Server as SAS
-import Common.HasVal.Class
+import Common.HasField
 import Common.Auth.Types
 
 {-|
   Constraints required for building the minimal Servant context with
   @apiContext@.
 -}
-type APIContextConstraints env = ( HasVal "jwtSettings" env JWTSettings
-                                 , HasVal "cookieSettings" env CookieSettings
+type APIContextConstraints env = ( HasField "jwtSettings" env JWTSettings
+                                 , HasField "cookieSettings" env CookieSettings
                                  )
 
 {-|
@@ -83,7 +83,7 @@ type AuthenticationAPI input identity = (
 type ServerConstraints m env = ( MonadError ServantErr m
                                , MonadIO m
                                , MonadReader env m
-                               , HasVal "jwtSettings" env JWTSettings
+                               , HasField "jwtSettings" env JWTSettings
                                )
 
 {-|

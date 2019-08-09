@@ -3,15 +3,16 @@
 module HaskellTodo.Controllers.User where
 
 import Data.Text as T
-import Common.HasVal.Class
+import Common.HasField
 import Common.Db.Transactor (Transactor(..))
 import Common.Crypto.Hasher (Hasher(..))
 import HaskellTodo.Models.User
 import HaskellTodo.Db.User as Db.User
 
-type ControllerConstraints env m transactor dbAction hasher = ( HasVal "transactor" env transactor, Transactor transactor m dbAction, UserDb dbAction
-                                                              , HasVal "hasher" env hasher, Hasher hasher m T.Text T.Text
-                                                              )
+type ControllerConstraints env m transactor dbAction hasher =
+  ( HasField "transactor" env transactor, Transactor transactor m dbAction, UserDb dbAction
+  , HasField "hasher" env hasher, Hasher hasher m T.Text T.Text
+  )
 
 listUsers :: ControllerConstraints env m transactor dbAction hasher => env -> m [User]
 listUsers env = do

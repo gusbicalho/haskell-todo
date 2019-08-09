@@ -2,7 +2,7 @@ module HaskellTodo.Test.Helpers.MockEnv where
 
 import Control.Monad.Writer
 import Data.Text as T
-import Common.HasVal.Class
+import Common.HasField
 import Common.Db.Transactor
 import Common.Crypto.Hasher
 
@@ -10,8 +10,8 @@ data MockEnv dbAction = MockEnv
 
 -- Transactor
 data MockDb dbAction = MockDb
-instance HasVal "transactor" (MockEnv action) (MockDb action) where
-  getVal _ = MockDb
+instance HasField "transactor" (MockEnv action) (MockDb action) where
+  getField _ = MockDb
 
 data DbActions action a = DbActions [action] a deriving (Eq, Show)
 
@@ -38,8 +38,8 @@ runTest = runWriter
 
 -- Hasher
 data MockCrypto = MockCrypto
-instance HasVal "hasher" (MockEnv action) MockCrypto where
-  getVal _ = MockCrypto
+instance HasField "hasher" (MockEnv action) MockCrypto where
+  getField _ = MockCrypto
 
 instance Monad m => Hasher MockCrypto m T.Text T.Text where
   maybeHash _ input = return $ Just $ "hash_" <> input

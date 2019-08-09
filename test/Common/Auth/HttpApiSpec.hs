@@ -15,15 +15,15 @@ import Servant
 import Servant.Auth.Server as SAS
 import Control.Monad.Reader
 
-import Common.HasVal.Class
+import Common.HasField
 import Common.Auth.HttpApi as HttpApi
 import Common.Test.Helpers.Wai
 
 newtype MockEnv = MockEnv JWTSettings
-instance HasVal "cookieSettings" MockEnv CookieSettings where
-  getVal _ = defaultCookieSettings
-instance HasVal "jwtSettings" MockEnv JWTSettings where
-  getVal (MockEnv jwtSettings) = jwtSettings
+instance HasField "cookieSettings" MockEnv CookieSettings where
+  getField _ = defaultCookieSettings
+instance HasField "jwtSettings" MockEnv JWTSettings where
+  getField (MockEnv jwtSettings) = jwtSettings
 
 data Input = Input { username :: String, password :: String } deriving (Eq, Show, Generic)
 instance FromJSON Input where

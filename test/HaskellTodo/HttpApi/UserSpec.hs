@@ -13,9 +13,9 @@ import Servant
 import Servant.Auth.Server as SAS
 import Control.Monad.Reader
 
+import Common.Db.Transactor (Transactor(..))
 import qualified HaskellTodo.Env as Env
 import HaskellTodo.Auth.Types
-import Common.Db.Transactor (Transactor(..))
 import qualified HaskellTodo.Db.User as Db.User
 import HaskellTodo.Models.User
 import HaskellTodo.HttpApi.User (api, server)

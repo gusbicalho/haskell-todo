@@ -1,5 +1,5 @@
 module Common.Version.Class
-  ( HasVal (..)
+  ( HasField (..)
   , Version
   , toText
   , fromText
@@ -7,7 +7,7 @@ module Common.Version.Class
 
 import qualified Data.Text as T
 import Data.String (IsString(..))
-import Common.HasVal.Class
+import Common.HasField
 
 newtype Version = Version { toText :: T.Text } deriving (Eq, Show)
 
@@ -17,5 +17,5 @@ fromText = Version
 instance IsString Version where
   fromString = fromText . fromString
 
-instance HasVal "version" Version Version where
-  getVal = id
+instance HasField "version" Version Version where
+  getField = id
