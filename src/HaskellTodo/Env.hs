@@ -7,7 +7,7 @@ import Network.Wai.Handler.Warp (Port)
 import Crypto.BCrypt
 import Common.HasField
 import Common.Crypto.BCrypt
-import Common.Version.Class (Version)
+import Common.Version.Types (Version)
 import HaskellTodo.Config (Config(..))
 import Common.Db.Transactor (Transactor (..))
 import Common.Db.SQLite (SQLiteDb, sqliteDb)

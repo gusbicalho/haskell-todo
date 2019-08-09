@@ -24,7 +24,7 @@ import Common.Util.AesonHelpers
 
 import qualified Common.Config.Loader as CL
 import Common.HasField
-import Common.Version.Class (Version, fromText)
+import Common.Version.Types (Version, fromText)
 
 data Config = Config { port :: Port
                      , _version :: T.Text
