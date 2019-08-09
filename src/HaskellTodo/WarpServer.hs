@@ -18,13 +18,13 @@ type WarpAppM = ReaderT Env.Env Handler
 
 withSettingsFromEnv :: Env.Env -> (Settings -> IO a) -> IO a
 withSettingsFromEnv env actionFn = withStdoutLogger $ \aplogger ->
-    actionFn $ setPort (Config.port $ #config env)
+    actionFn $ setPort (#port env)
              . setLogger aplogger
              $ defaultSettings
 
 run :: Env.Env -> IO ()
 run env = do
-    let port = #port . #config $ env
+    let port = #port env
     putStrLn $ "Server running at port " ++ show port
     withSettingsFromEnv env $ \settings ->
       runSettings settings (HttpApi.app env provideDependencies)
