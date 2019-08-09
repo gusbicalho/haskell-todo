@@ -9,19 +9,19 @@ import Common.Crypto.BCrypt
 import Common.Version.Class (HasVal(..), Version)
 import HaskellTodo.Config (Config(..))
 import Common.Db.Transactor (Transactor (..))
-import Common.Db.SQLite (SqliteDb, sqliteDb)
+import Common.Db.SQLite (SQLiteDb, sqliteDb)
 import qualified HaskellTodo.Db.User as Db.User
 import qualified HaskellTodo.Db.Item as Db.Item
 
 data Env = Env {
   config :: Config
-, sqlite :: SqliteDb
+, sqlite :: SQLiteDb
 , jwtSettings :: JWTSettings
 , cookieSettings :: CookieSettings
 , bcrypt :: BCrypter
 }
 
-instance HasVal "transactor" Env SqliteDb where
+instance HasVal "transactor" Env SQLiteDb where
   getVal = sqlite
 
 instance HasVal "version" Env Version where

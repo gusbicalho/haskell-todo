@@ -63,7 +63,7 @@ query, all in a single transaction. Therefore, @action@s of @Transactor@s for
 these databases may have instances for @Monad@ and @MonadIO@.
 
 On the other hand, databases like Datomic require transactions to be sent all
-at once, as a single message. This means the @action@s for a @Transactor@ for
+at once, as a single request. This means the @action@s for a @Transactor@ for
 Datomic cannot be @Monad@s. However, they could support other typeclasses, like
 @Monoid@, for example.
 -}
