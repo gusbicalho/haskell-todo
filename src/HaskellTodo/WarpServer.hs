@@ -1,3 +1,6 @@
+{-|
+Description: Wires up the Warp server for out HTTP API
+-}
 module HaskellTodo.WarpServer (
     run
   ) where
