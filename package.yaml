@@ -67,6 +67,7 @@ library:
   - base >= 4.7 && < 5
   - aeson
   - aeson-extra
+  - async
   - bcrypt
   - bytestring
   - jose
