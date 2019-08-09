@@ -6,6 +6,11 @@ sources, merging them, and parsing the final result into an application-defined
 type.lookup
 
 Currently, the module exports loaders for files and env vars.
+
+This obviously isn't a polished and very general piece of software. For
+increased generality, we could support other languages for the config input
+(such as YAML, XML, etc), or maybe allow more control over merging of config
+sources. However, the current module works as a decent proof of concept.
 -}
 module Common.Config.Loader
   ( ConfigLoader

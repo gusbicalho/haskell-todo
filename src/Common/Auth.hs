@@ -21,21 +21,32 @@ Both @AuthenticationAPI@ and @AuthenticatedAPI@ require a Servant context
 that provide JWTSettings and CookieSettings. The exported @apiContext@ function
 can build such a context, given an environment that provides these settings
 via @Common.HasVal.Class@.
+
+I decided to extract all this functionality to @Common@ in order to decouple
+Servant logic from the domain of the authentication service as much as
+possible. This module stll makes a lot of assumptions - I don't think it's
+general enough to actually be a library in the wild. However, I still think it
+was worth separating this from the code that actually checks if a
+username/password pair (or whatever else your client must provide in order to
+get a token) is acceptable.
 -}
-module Common.Auth
-  ( module Common.Auth.Types
-  , module Common.Auth.HttpApi
+module Common.Auth (
+  -- * Wire types
+    AuthTokenClaims (..)
+  , Extensible (..)
+  , LoginReturn (..)
+  -- * Servant HTTP API
+  -- ** Authentication API (login)
+  , AuthenticationAPI
+  , server
+  , ServerConstraints
+  -- ** Authenticated API
+  , AuthenticatedAPI
+  -- ** Servant Context
+  , APIContextConstraints
+  , APIContext
+  , apiContext
   ) where
 
-import Common.Auth.Types ( AuthTokenClaims (..)
-                         , Extensible (..)
-                         , LoginReturn (..)
-                         )
-import Common.Auth.HttpApi ( AuthenticationAPI
-                           , server
-                           , ServerConstraints
-                           , AuthenticatedAPI
-                           , APIContextConstraints
-                           , APIContext
-                           , apiContext
-                           )
+import Common.Auth.Types
+import Common.Auth.HttpApi
