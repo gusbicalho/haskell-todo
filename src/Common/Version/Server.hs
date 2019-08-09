@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedLabels #-}
-
 {-|
 Description: Small utility server to expose the current version of a service
 

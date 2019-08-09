@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedLabels #-}
-
 module HaskellTodo.Controllers.User where
 
 import Data.Text as T

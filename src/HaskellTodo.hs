@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedLabels #-}
-
 module HaskellTodo
     ( startApp
     ) where

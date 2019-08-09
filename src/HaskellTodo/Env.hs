@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedLabels #-}
-
 module HaskellTodo.Env where
 
 import Servant.Auth.Server

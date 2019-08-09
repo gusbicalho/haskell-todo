@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedLabels #-}
-
 {-|
 Description : Generic authentication HTTP API in Servant
 

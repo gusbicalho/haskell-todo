@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedLabels #-}
-
 module HaskellTodo.Controllers.Item where
 
 import Common.HasField
