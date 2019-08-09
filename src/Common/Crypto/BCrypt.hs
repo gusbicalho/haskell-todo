@@ -1,3 +1,6 @@
+{-|
+Description: Implementation of Hasher using BCrypt
+-}
 module Common.Crypto.BCrypt where
 
 import Control.Monad.IO.Class

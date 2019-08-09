@@ -6,10 +6,10 @@ I guess this isn't really general enough to support many encryption libraries
 besides BCrypt, but it works as an exercise in abstraction.
 
 This is a Multi-Param Type Class. Basically, an instance of this class for some
-type @hasher@ tells us that given __a value of type @hasher@__, we can __create
-actions in monad @hashingM@__, either __taking a value of type @input@ and
-outputting a value of type @hash@__, or __validating a @hash@ value against
-some @input@ value__.
+type @hasher@ tells us that given __a value of type @hasher@__, we can
+__create actions in monad @hashingM@__, either
+__taking a value of type @input@ and outputting a value of type @hash@__, or
+__validating a @hash@ value against some @input@ value__.
 
 The functional dependencies here tell us that, given a @hasher@ type and an
 @input@ type, we unambiguously know the output type @hash@. This means you
@@ -45,7 +45,7 @@ to the application mtl stack (which runs into the famous n^2 problem).
 
 Instead, we just make a @hasher@ that can run in any @MonadIO@ context.
 Code that uses it is just as generic - it can just require that a Hasher exist
-for some monadic context and and input type.
+for some monadic context and input type.
 -}
 module Common.Crypto.Hasher where
 
