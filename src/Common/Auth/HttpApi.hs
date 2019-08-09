@@ -4,25 +4,27 @@
 Description : Generic authentication HTTP API in Servant
 
 This module implements a generic Http API for authentication, using Servant.
-For convenience, you should probably import the @Common.Auth@ module, which
+For convenience, you should probably import the "Common.Auth" module, which
 exports everything in this module, along with the types from
-@Common.Auth.Types@.
+"Common.Auth.Types".
 
-It exports the @AuthenticationAPI@ type constructor, that returns a Servant API
+It exports the 'AuthenticationAPI' type constructor, that returns a Servant API
 type with endpoints for user login. Correspondingly, the @server@ exported
 function takes an authentication function and builds a Servant server matching
-the @AuthenticationAPI@.
+the 'AuthenticationAPI'.
 
-The AuthenticationAPI requires an environment type that provides Servant
-JWTSettings and CookieSettings, by implementing @Common.HasField.Class@.
+The 'AuthenticationAPI' requires an environment type that provides Servant
+'Servant.Auth.Server.JWTSettings' and 'Servant.Auth.Server.CookieSettings', by
+implementing 'Common.HasField.HasField'.
 
-The @AuthenticatedAPI@ type constructor wraps a Servant API in a JWT
+The 'AuthenticatedAPI' type constructor wraps a Servant API in a JWT
 authentication combinator.
 
-Both @AuthenticationAPI@ and @AuthenticatedAPI@ require a Servant context
-that provide JWTSettings and CookieSettings. The exported @apiContext@ function
-can build such a context, given an environment that provides these settings
-via @Common.HasField.Class@.
+Both 'AuthenticationAPI' and 'AuthenticatedAPI' require a Servant context
+that provide 'Servant.Auth.Server.JWTSettings' and
+'Servant.Auth.Server.CookieSettings'. The exported 'apiContext' function can
+build such a context, given an environment that provides these settings via
+'Common.HasField.HasField'.
 -}
 module Common.Auth.HttpApi where
 
@@ -39,7 +41,7 @@ import Common.Auth.Types
 
 {-|
   Constraints required for building the minimal Servant context with
-  @apiContext@.
+  'apiContext'.
 -}
 type APIContextConstraints env = ( HasField "jwtSettings" env JWTSettings
                                  , HasField "cookieSettings" env CookieSettings
@@ -54,7 +56,7 @@ type APIContext = '[ JWTSettings
 
 {-|
   Wraps a Servant API in JWT authentication, expecting tokens that contain
-  @AuthTokenClaims@ with the specified #identity@ type.
+  'AuthTokenClaims' with the specified #identity@ type.
 -}
 type AuthenticatedAPI identity api = Auth '[JWT] (AuthTokenClaims identity) :> api
 
@@ -78,7 +80,7 @@ type AuthenticationAPI input identity = (
   )
 
 {-|
-  Constraints required to build an authentication server with @server@.
+  Constraints required to build an authentication server with 'server'.
 -}
 type ServerConstraints m env = ( MonadError ServantErr m
                                , MonadIO m
@@ -87,7 +89,7 @@ type ServerConstraints m env = ( MonadError ServantErr m
                                )
 
 {-|
-  Builds an authentication server that conforms to @AuthenticationAPI@.
+  Builds an authentication server that conforms to 'AuthenticationAPI'.
 -}
 server :: (ServerConstraints m env, ToJSON identity)
           => (env -> input -> m (Maybe identity))

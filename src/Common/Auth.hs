@@ -2,29 +2,31 @@
 Description : Generic authentication HTTP API in Servant
 
 This module implements a generic Http API for authentication, using Servant.
-Types for token and request bodies are defined in @Common.Auth.Types@ and
+Types for token and request bodies are defined in "Common.Auth.Types" and
 re-exported here. Actual implementation of the Servant API is in
-@Common.Auth.HttpApi@, also re-exported by this module.
+"Common.Auth.HttpApi", also re-exported by this module.
 
-It exports the @AuthenticationAPI@ type constructor, that returns a Servant API
-type with endpoints for user login. Correspondingly, the @server@ exported
+It exports the 'AuthenticationAPI' type constructor, that returns a Servant API
+type with endpoints for user login. Correspondingly, the 'server' exported
 function takes an authentication function and builds a Servant server matching
-the @AuthenticationAPI@.
+the 'AuthenticationAPI'.
 
-The AuthenticationAPI requires an environment type that provides Servant
-JWTSettings and CookieSettings, by implementing @Common.HasField.Class@.
+The 'AuthenticationAPI' requires an environment type that provides Servant
+'Servant.Auth.Server.JWTSettings' and 'Servant.Auth.Server.CookieSettings', by
+implementing 'Common.HasField.HasField'.
 
-The @AuthenticatedAPI@ type constructor wraps a Servant API in a JWT
+The 'AuthenticatedAPI' type constructor wraps a Servant API in a JWT
 authentication combinator.
 
-Both @AuthenticationAPI@ and @AuthenticatedAPI@ require a Servant context
-that provide JWTSettings and CookieSettings. The exported @apiContext@ function
-can build such a context, given an environment that provides these settings
-via @Common.HasField.Class@.
+Both 'AuthenticationAPI' and 'AuthenticatedAPI' require a Servant context
+that provide 'Servant.Auth.Server.JWTSettings' and
+'Servant.Auth.Server.CookieSettings'. The exported 'apiContext' function can
+build such a context, given an environment that provides these settings via
+'Common.HasField.HasField'.
 
 I decided to extract all this functionality to @Common@ in order to decouple
 Servant logic from the domain of the authentication service as much as
-possible. This module stll makes a lot of assumptions - I don't think it's
+possible. This module still makes a lot of assumptions - I don't think it's
 general enough to actually be a library in the wild. However, I still think it
 was worth separating this from the code that actually checks if a
 username/password pair (or whatever else your client must provide in order to

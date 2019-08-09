@@ -3,12 +3,13 @@
 {-|
 Description: Convenience module around GHC.Records and GHC.OverloadedLabels
 
-This module re-exports the @HasField@ typeclass from @GHC.Records@. It also
-defines an orphan instance for the @IsLabel@ typeclass, which allows us to
-use the @OverloadedLabels@ extension for nicer syntax, instead of calling
-@getField@ directly (see example below).
+This module re-exports the 'HasField' typeclass from "GHC.Records". Instances
+of this class are automatically defined for all fields of record types. This
+modules also defines an orphan instance for the 'IsLabel' typeclass, which
+allows us to use the @OverloadedLabels@ extension for nicer syntax, instead of
+calling 'getField' directly (see example below).
 
-This combination of @HasField@ and @OverloadedLabels@ is used throughout this
+This combination of 'HasField' and @OverloadedLabels@ is used throughout this
 codebase to allow a flexible kind of "dependency injection". Application code
 can define a single @Env@ type that provides the necessary fields for all
 Common functionality, as well as all application code. On the other hand, we
@@ -40,8 +41,8 @@ myFoo2 = showFoo2 $ Env "fooz" 27
 @
 
 Regarding the choice to add an orphan instance: this is an opinionated decision
-to instantiate @IsLabel@ for @(->)@ using the simplest possible approach. Other
-options exist - for example, one could define an instance of @IsLabel@ that
+to instantiate 'IsLabel' for @(->)@ using the simplest possible approach. Other
+options exist - for example, one could define an instance of 'IsLabel' that
 returns some kind of lens, like this module does:
 <https://hackage.haskell.org/package/generic-lens-labels>.
 We choose the direct approach of using labels as simple getter functions. Code

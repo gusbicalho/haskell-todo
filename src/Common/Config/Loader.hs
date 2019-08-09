@@ -44,7 +44,7 @@ waterfall vs = (mergeAll (rights vs) (object []), lefts vs)
   JSON object to the desired type. Returns Nothing if the parse fails.
 
   This action prints the error messages of failed loaders to stdout using
-  @putStrLn@. A nice improvement would be to make a version that accepts a
+  'putStrLn'. A nice improvement would be to make a version that accepts a
   custom logger.
 -}
 loadConfigFrom :: FromJSON a => [ConfigLoader] -> IO (Maybe a)
