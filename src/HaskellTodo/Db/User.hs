@@ -1,5 +1,3 @@
-{-# LANGUAGE RecordWildCards #-}
-
 module HaskellTodo.Db.User
   ( UserDb(..)
   ) where
@@ -37,9 +35,10 @@ instance FromRow DbUser where
 
 newtype DbNewUser = DbNewUser NewUser
 instance ToRow DbNewUser where
-  toRow (DbNewUser NewUser {..}) = toRow ( loginToText newLogin
-                                         , passwordToText newPassword
-                                         )
+  toRow (DbNewUser (NewUser newLogin newPassword)) =
+    toRow ( loginToText newLogin
+          , passwordToText newPassword
+          )
 
 instance UserDb SQLiteAction where
   initDB :: SQLiteAction ()

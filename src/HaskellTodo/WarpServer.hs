@@ -10,19 +10,18 @@ import Network.Wai.Logger
 import Control.Monad.Reader
 import Servant
 
-import qualified HaskellTodo.Config as Config
-import qualified HaskellTodo.Env as Env
+import HaskellTodo.Env ( Env (..) )
 import qualified HaskellTodo.HttpApi as HttpApi
 
-type WarpAppM = ReaderT Env.Env Handler
+type WarpAppM = ReaderT Env Handler
 
-withSettingsFromEnv :: Env.Env -> (Settings -> IO a) -> IO a
+withSettingsFromEnv :: Env -> (Settings -> IO a) -> IO a
 withSettingsFromEnv env actionFn = withStdoutLogger $ \aplogger ->
     actionFn $ setPort (#port env)
              . setLogger aplogger
              $ defaultSettings
 
-run :: Env.Env -> IO ()
+run :: Env -> IO ()
 run env = do
     let port = #port env
     putStrLn $ "Server running at port " ++ show port
