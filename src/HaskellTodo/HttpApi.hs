@@ -1,3 +1,17 @@
+{-|
+Description: Top-level Servant HTTP API
+
+This file just composes several the Servant APIs from @HaskellTodo.HttpApi.*@
+modules into a single API.
+
+One interesting limitation of Servant (or Servant.Auth, more likely) shows up
+here in the way we have to explicitly pass the @auth@ argument to 'User.server'
+and 'Item.server'. This happens because the 'Auth.AuthenticatedAPI' type (which
+uses "Servant.Auth") must be matched by a function that takes an argument of
+type 'Common.Auth.AuthTokenClaims' and returns a server. Both 'User.server'
+and 'Item.server', individually, have the required type, but their combination
+using ':<|>' does not.
+-}
 module HaskellTodo.HttpApi
   ( api
   , server

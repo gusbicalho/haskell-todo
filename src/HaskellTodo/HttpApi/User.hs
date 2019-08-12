@@ -1,3 +1,21 @@
+{-|
+Description: Servant API for dealing with Users
+
+This implements a simple Servant API for creating and getting Users, and also
+to get all Items for a User. This module should have no substantial code. All
+we do here is:
+
+1) Run authorization checks, by delegating to "Auth.Logic";
+
+2) Run adapters to convert between our @WireTypes@ and @Models@; and
+
+3) Call controllers to actually get some data or effect some change.
+
+The 'server' must in a 'Monad' that satisfies all 'ServerConstraints'. One of
+these is @'MonadReader' 'Env.Env'@. In other words, this API is coupled to the
+concrete 'Env.Env' type we built for this application. For more discussion on
+this, check out the docs for "HaskellTodo.Env".
+-}
 module HaskellTodo.HttpApi.User
   ( api
   , server

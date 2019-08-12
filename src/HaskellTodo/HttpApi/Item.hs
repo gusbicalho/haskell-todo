@@ -1,3 +1,26 @@
+{-|
+Description: Servant API for dealing with Items
+
+This implements a simple Servant API for creating and getting Items. This
+module should have no substantial code. All we do here is:
+
+1) Run authorization checks, by delegating to "Auth.Logic";
+
+2) Run adapters to convert between our @WireTypes@ and @Models@; and
+
+3) Call controllers to actually get some data or effect some change.
+
+The 'server' must in a 'Monad' that satisfies all 'ServerConstraints'. One of
+these is @'MonadReader' 'Env.Env'@. In other words, this API is coupled to the
+concrete 'Env.Env' type we built for this application. For more discussion on
+this, check out the docs for "HaskellTodo.Env".
+
+I wanted to pattern match on the authorization logic right at the top of the
+'server', which simplified to code for the specific handlers. Howver, this lead
+to a small boilerplate of "forbidden handlers" at the bottom, which must match
+the shape of the API, even though they just respond 403. I haven't found a
+better way yet.
+-}
 module HaskellTodo.HttpApi.Item where
 
 import Control.Monad.Except
