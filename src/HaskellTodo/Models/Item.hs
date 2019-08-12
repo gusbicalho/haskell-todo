@@ -1,3 +1,6 @@
+{-|
+Description: Item-related types used by controller and logic
+-}
 module HaskellTodo.Models.Item
   ( Item (..)
   , ItemState (..)

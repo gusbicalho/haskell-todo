@@ -1,3 +1,6 @@
+{-|
+Description: User-related types used by controller and logic
+-}
 module HaskellTodo.Models.User
   ( User (..)
   , NewUser (..)
