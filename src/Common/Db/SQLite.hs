@@ -14,7 +14,9 @@ We define a newtype 'SQLiteAction', which is a simple wrapper around a function
 that takes a 'Connection' and does some 'IO', presumably by using that
 'Connection' to talk to the database. The 'Applicative' and 'Monad' instances
 for 'SQLiteAction' ensure that all the wrapped functions are called in
-sequence.
+sequence. We do not try to hide "Database.SQLite.Simple": implementations of
+db actions meant to run in this transactor will have to use the API from that
+library directly.
 
 Notice that this database allows us to run arbitrary code in the middle of a
 database transaction (as most SQL databases do). We allow this here by making
