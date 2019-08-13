@@ -79,7 +79,7 @@ buildEnv config = do
   jwtKey <- readKey $ jwtKeyPath config
   let jwtSettings = defaultJWTSettings jwtKey
       cookieSettings = cookieSettingsFromConfig config
-      bcrypt = BCrypter { bcryptPolicy = slowerBcryptHashingPolicy }
+      bcrypt = BCrypter { bcryptPolicy = fastBcryptHashingPolicy }
   transact sqlite Db.User.initDB
   transact sqlite Db.Item.initDB
   return Env {
