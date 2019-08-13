@@ -52,4 +52,4 @@ Once the server is running (from `ghci` or `stack run`), you can enter
 simple web page.
 
 Code for this front end is available [here](/static/index.html). I'm not very
-proud of it, but it wasn't really the focus here ¯\_(ツ)_/¯
+proud of it, but it wasn't really the focus here ¯\\\_(ツ)_/¯
