@@ -37,8 +37,7 @@ import qualified HaskellTodo.WireTypes.Item as Wire.Item
 import qualified HaskellTodo.Controllers.Item as C.Item
 import qualified HaskellTodo.Adapters.Item as A.Item
 
-type API = Get '[JSON] Wire.User.ManyUsers
-      :<|> ReqBody '[JSON] Wire.User.NewUserInput :> Post '[JSON] Wire.User.SingleUser
+type API = ReqBody '[JSON] Wire.User.NewUserInput :> Post '[JSON] Wire.User.SingleUser
       :<|> Capture "userid" Integer :> Get '[JSON] Wire.User.SingleUser
       :<|> Capture "userid" Integer :> "items" :>
         Get '[JSON] Wire.Item.ManyItems
@@ -52,16 +51,10 @@ type ServerConstraints m = ( MonadError ServantErr m
                            )
 
 server :: ServerConstraints m => AuthResult IdentityTokenClaims -> ServerT API m
-server auth = listUsers
-         :<|> createUser
+server auth = createUser
          :<|> getUser
          :<|> userItems
   where -- Handlers
-    listUsers = do
-      env <- ask
-      users <- C.User.listUsers env
-      return $ A.User.manyWire users
-
     createUser newUserInput
       | Auth.Logic.authenticated auth = throwError err403
       | otherwise = do

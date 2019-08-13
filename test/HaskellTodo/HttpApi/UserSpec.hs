@@ -48,14 +48,6 @@ app authenticate = do
 
 spec :: Spec
 spec = do
-  describe "GET /" $ do
-    before (app unauthenticated) $ do
-      it "responds with 200" $ do
-        get "/" `shouldRespondWith` 200
-      it "responds with [User]" $ do
-        get "/" `shouldRespondWith` [json|{users: [{id: 1, login: "isaac@newton.com"}
-                                                  ,{id: 2, login: "albert@einstein.com"}]}
-                                         |]
   describe "GET /:id" $ do
     before (app (const $ loginAsUser 2)) $ do
       describe "authenticated as a user" $ do
