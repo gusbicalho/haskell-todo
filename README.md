@@ -9,8 +9,9 @@ it would be like to use Haskell in production.
 Overall code organization is heavily based on what I've seen working with
 microservices at [Nubank](https://nubank.com.br) - in a _Clojure_ codebase.
 I have no idea on how it compares to typical Haskell architectures. I built
-this mostly by fooling around with the language and striving for decoupling
-and separation of concerns.
+this mostly by fooling around with the language and striving for decoupling and
+separation of concerns. I tried write what I think is Good Code, but I may have
+gotten a few things wrong 😅
 
 I've learned a lot building this simple thing. I've tried to document some of
 this learning in the modules themselves, in haddock sections. I hope others can
