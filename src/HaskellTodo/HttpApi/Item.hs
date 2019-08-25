@@ -44,12 +44,12 @@ type API = ReqBody '[JSON] Wire.Item.NewItemInput :> Post '[JSON] Wire.Item.Sing
 api :: Proxy API
 api = Proxy
 
-type ServerConstraints m = ( MonadError ServantErr m
+type ServerConstraints m = ( MonadError ServerError m
                            , MonadIO m
                            , MonadReader Env m
                            )
 
-justOr404 :: MonadError ServantErr m => Maybe a -> m a
+justOr404 :: MonadError ServerError m => Maybe a -> m a
 justOr404 Nothing     = throwError err404
 justOr404 (Just item) = return item
 

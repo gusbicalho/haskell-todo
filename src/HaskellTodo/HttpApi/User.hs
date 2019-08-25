@@ -45,7 +45,7 @@ type API = ReqBody '[JSON] Wire.User.NewUserInput :> Post '[JSON] Wire.User.Sing
 api :: Proxy API
 api = Proxy
 
-type ServerConstraints m = ( MonadError ServantErr m
+type ServerConstraints m = ( MonadError ServerError m
                            , MonadIO m
                            , MonadReader Env.Env m
                            )

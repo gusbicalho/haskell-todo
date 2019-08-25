@@ -80,7 +80,7 @@ type AuthenticationAPI input identity = (
 {-|
   Constraints required to build an authentication server with 'server'.
 -}
-type ServerConstraints m env = ( MonadError ServantErr m
+type ServerConstraints m env = ( MonadError ServerError m
                                , MonadIO m
                                , MonadReader env m
                                , HasField "jwtSettings" env JWTSettings
