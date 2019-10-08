@@ -1,12 +1,10 @@
 {-# LANGUAGE DeriveAnyClass, DeriveFunctor, DeriveGeneric, DerivingStrategies, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module FETodo.Scratch where
 
-import Control.Effect
-import Control.Effect.Sum
-import Control.Effect.Carrier
-import Control.Effect.Reader
-import Control.Effect.State.Strict
-import Control.Effect.Lift
+import Control.Carrier
+import Control.Carrier.Reader
+import Control.Carrier.State.Strict
+import Control.Carrier.Lift
 import Data.Text (Text)
 import GHC.Generics (Generic, Generic1)
 import Data.Maybe (listToMaybe)
@@ -16,9 +14,8 @@ data Config = Config { port :: Int
                      }
   deriving (Eq, Show)
 
-printConfig :: ( Member (Reader Config) sig
-               , Member (Lift IO)       sig
-               , Carrier sig m
+printConfig :: ( Has (Reader Config) sig m
+               , Has (Lift IO)       sig m
                ) => m ()
 printConfig = do
   config <- ask @Config
@@ -35,19 +32,13 @@ data UserDb m k
   | PutUser User (m k)
   deriving (Generic1, Functor, HFunctor, Effect)
 
-getUser :: ( Member UserDb sig
-           , Carrier sig m
-           ) => Int -> m (Maybe User)
+getUser :: (Has UserDb sig m) => Int -> m (Maybe User)
 getUser userId = send (GetUser userId pure)
 
-putUser :: ( Member UserDb sig
-           , Carrier sig m
-           ) => User -> m ()
+putUser :: (Has UserDb sig m) => User -> m ()
 putUser user = send (PutUser user (pure ()))
 
-renameUser :: ( Member UserDb sig
-              , Carrier sig m
-              ) => Int -> (Text -> Text) -> m (Maybe User)
+renameUser :: (Has UserDb sig m) => Int -> (Text -> Text) -> m (Maybe User)
 renameUser userId rename = do
   maybeUser <- getUser userId
   case maybeUser of
@@ -59,7 +50,7 @@ renameUser userId rename = do
 
 {- Example - ghci
 :{
-  (run . runUserListDb (UserList [User 0 "gus"]) $ renameUser 0 (T.take 2))
+  (run . runUserListDb (UserList [User 0 "gus"]) $ renameUser 0 (Data.Text.take 2))
   ==
   ( UserList [ User {userId = 0, userName = "gu"} ]
   , Just (User {userId = 0, userName = "gu"})

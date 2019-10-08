@@ -30,6 +30,10 @@ resolver: lts-14.6
 #   - wai
 packages:
 - .
+
+extra-deps:
+- git: git@github.com:fused-effects/fused-effects.git
+  commit: e762ee14b5c76a63fe98f2123433da17ba4f14fd
 # Dependency packages to be pulled from upstream that are not in the resolver.
 # These entries can reference officially published versions as well as
 # forks / in-progress versions pinned to a git hash. For example:

@@ -3,7 +3,21 @@
 # For more information, please see the documentation at:
 #   https://docs.haskellstack.org/en/stable/lock_files
 
-packages: []
+packages:
+- completed:
+    cabal-file:
+      size: 4165
+      sha256: 3da1c6b246fc13589192a034b19ca5fd9652cbeb6938c65a33249a5b39b2976e
+    name: fused-effects
+    version: 0.5.0.1
+    git: git@github.com:fused-effects/fused-effects.git
+    pantry-tree:
+      size: 4619
+      sha256: a0bf75842bcd276fe43bf4e3104c1f41842ee8f61737a37599f206b39ed68806
+    commit: e762ee14b5c76a63fe98f2123433da17ba4f14fd
+  original:
+    git: git@github.com:fused-effects/fused-effects.git
+    commit: e762ee14b5c76a63fe98f2123433da17ba4f14fd
 snapshots:
 - completed:
     size: 524127
