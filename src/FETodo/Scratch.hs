@@ -5,14 +5,10 @@ import Control.Effect
 import Control.Effect.Sum
 import Control.Effect.Carrier
 import Control.Effect.Reader
+import Control.Effect.State.Strict
 import Control.Effect.Lift
-import Control.Effect.Interpret
-import Control.Monad
-import Control.Monad.IO.Class
 import Data.Text (Text)
-import qualified Data.Text as T
 import GHC.Generics (Generic, Generic1)
-import Data.Kind
 import Data.Maybe (listToMaybe)
 
 data Config = Config { port :: Int
@@ -49,7 +45,6 @@ putUser :: ( Member UserDb sig
            ) => User -> m ()
 putUser user = send (PutUser user (pure ()))
 
--- usage
 renameUser :: ( Member UserDb sig
               , Carrier sig m
               ) => Int -> (Text -> Text) -> m (Maybe User)
@@ -62,37 +57,39 @@ renameUser userId rename = do
       in do putUser user'
             getUser userId
 
+{- Example - ghci
+:{
+  (run . runUserListDb (UserList [User 0 "gus"]) $ renameUser 0 (T.take 2))
+  ==
+  ( UserList [ User {userId = 0, userName = "gu"} ]
+  , Just (User {userId = 0, userName = "gu"})
+  )
+:}
+True
+-}
+
 -- handler
 
 newtype UserList = UserList [User]
   deriving (Eq, Show)
 
-newtype UserListDb m a = UserListDb { runUserListDb :: UserList -> m (UserList, a) }
+newtype UserListDb m a = UserListDb { stateC :: StateC UserList m a }
+  deriving newtype (Functor, Applicative, Monad)
+
+runUserListDb :: UserList -> UserListDb m a -> m (UserList, a)
+runUserListDb ul uldb = runState ul (stateC uldb)
 
 execUserListDb :: Functor m => UserList -> UserListDb m a -> m UserList
-execUserListDb ul uldb = fst <$> runUserListDb uldb ul
+execUserListDb ul uldb = fst <$> runUserListDb ul uldb
 
 evalUserListDb :: Functor m => UserList -> UserListDb m a -> m a
-evalUserListDb ul uldb = snd <$> runUserListDb uldb ul
-
-instance (Monad m) => Functor (UserListDb m) where
-  fmap = liftM
-
-instance (Monad m) => Applicative (UserListDb m) where
-  pure a = UserListDb $ \u -> return (u, a)
-  (<*>) = ap
-
-instance (Monad m) => Monad (UserListDb m) where
-  return = pure
-  (UserListDb runDb) >>= f = UserListDb $ \ul -> do
-    (ul', a) <- runDb ul
-    let (UserListDb runDb2) = f a
-    runDb2 ul'
+evalUserListDb ul uldb = snd <$> runUserListDb ul uldb
 
 instance (Carrier sig m, Effect sig) => Carrier (UserDb :+: sig) (UserListDb m) where
-  eff (L (GetUser uid  k)) = UserListDb $ \ul -> runUserListDb (k $ findUserInList uid ul) ul
-  eff (L (PutUser user k)) = UserListDb $ \ul -> runUserListDb k (putUserInList user ul)
-  eff (R other) = UserListDb $ \ul -> eff (handle (ul, ()) (uncurry $ flip runUserListDb) other)
+  eff (L (GetUser uid  k)) =       k =<< (UserListDb $ findUserInList uid <$> get)
+  eff (L (PutUser user k)) = const k =<< (UserListDb $ modify (putUserInList user))
+  eff (R other)            = send other
+  {-# INLINE eff #-}
 
 findUserInList :: Int -> UserList -> Maybe User
 findUserInList userId (UserList us) = listToMaybe . filter idMatch $ us
@@ -102,22 +99,3 @@ putUserInList user (UserList ulist) = UserList $ go ulist
   where go [] = [user]
         go (u:us) | (userId u == userId user) = user : us
                   | otherwise = u : go us
-
--- data UserLookupTableC m a = ULTC (UserLookupTable -> m a)
---   deriving (Functor)
--- instance Monad m => Applicative (UserLookupTableC m) where
---   pure x = ULTC (const $ return x)
---   (<*>) = ap
--- instance Monad m => Monad (UserLookupTableC m) where
---   (ULTC ma) >>= f = ULTC $ \ult -> do
---     a <- ma ult
---     let (ULTC sndStep) = f a
---     sndStep ult
--- runULTC ult (ULTC f) = f ult
-
--- instance (Carrier sig m, Effect sig) =>
---          Carrier (UserDb :+: sig) (UserLookupTableC m)
---   where
---     eff (L (GetUser userId cont)) = cont =<< (ULTC $ \(ULT ult) ->
---       return $ lookup userId ult)
---     eff (R sig') = ULTC . const <$> eff sig'
