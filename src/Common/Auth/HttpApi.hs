@@ -82,7 +82,7 @@ type AuthenticationAPI input identity = (
   Constraints required to build an authentication server with 'server'.
 -}
 type ServerConstraints env sig m = ( Has (Error ServerError) sig m
-                                   , MonadIO m
+                                   , MonadIO m -- TODO use a custome JWT efffect here
                                    , Has (Reader env) sig m
                                    , HasField "jwtSettings" env JWTSettings
                                    )
@@ -103,6 +103,7 @@ server authFn = login :<|> login
                     Just identity -> return identity
       let claims = AuthTokenClaims $ Known identity
       jwtSettings <- asks @env #jwtSettings
+      -- TODO replace liftIO + makeJWT below with custom JWT effect
       jwt <- liftIO $ makeJWT claims jwtSettings Nothing
       case jwt of
         Left _ -> throwError err500
