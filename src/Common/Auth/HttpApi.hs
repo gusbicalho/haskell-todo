@@ -26,15 +26,13 @@ build such a context, given an environment that provides these settings via
 -}
 module Common.Auth.HttpApi where
 
-import Control.Monad.IO.Class
 import Control.Effect.Reader
 import Control.Effect.Error
+import Common.Effect.JWT
 import Data.Aeson
-import Data.ByteString.Lazy.Char8 as BS
-import qualified Data.Text as T
 import Servant hiding (throwError)
 import Servant.Auth as SA
-import Servant.Auth.Server as SAS
+import qualified Servant.Auth.Server as SAS
 import Common.HasField
 import Common.Auth.Types
 
@@ -42,15 +40,15 @@ import Common.Auth.Types
   Constraints required for building the minimal Servant context with
   'apiContext'.
 -}
-type APIContextConstraints env = ( HasField "jwtSettings" env JWTSettings
-                                 , HasField "cookieSettings" env CookieSettings
+type APIContextConstraints env = ( HasField "jwtSettings" env SAS.JWTSettings
+                                 , HasField "cookieSettings" env SAS.CookieSettings
                                  )
 
 {-|
   Type list of types required in the Servant context for Auth APIs.
 -}
-type APIContext = '[ JWTSettings
-                   , CookieSettings
+type APIContext = '[ SAS.JWTSettings
+                   , SAS.CookieSettings
                    ]
 
 {-|
@@ -82,15 +80,16 @@ type AuthenticationAPI input identity = (
   Constraints required to build an authentication server with 'server'.
 -}
 type ServerConstraints env sig m = ( Has (Error ServerError) sig m
-                                   , MonadIO m -- TODO use a custome JWT efffect here
+                                   , Has JWTOps sig m
                                    , Has (Reader env) sig m
-                                   , HasField "jwtSettings" env JWTSettings
+                                   , HasField "jwtSettings" env SAS.JWTSettings
                                    )
 
 {-|
   Builds an authentication server that conforms to 'AuthenticationAPI'.
 -}
-server :: forall env sig m input identity. (ServerConstraints env sig m, ToJSON identity)
+server :: forall env sig m input identity.
+          (ServerConstraints env sig m, ToJSON identity)
           => (env -> input -> m (Maybe identity))
           -> ServerT (AuthenticationAPI input identity) m
 server authFn = login :<|> login
@@ -103,8 +102,7 @@ server authFn = login :<|> login
                     Just identity -> return identity
       let claims = AuthTokenClaims $ Known identity
       jwtSettings <- asks @env #jwtSettings
-      -- TODO replace liftIO + makeJWT below with custom JWT effect
-      jwt <- liftIO $ makeJWT claims jwtSettings Nothing
+      jwt <- makeJWT claims jwtSettings Nothing
       case jwt of
         Left _ -> throwError err500
-        Right tok -> return $ LoginReturn identity (T.pack $ BS.unpack tok)
+        Right tok -> return $ LoginReturn identity tok

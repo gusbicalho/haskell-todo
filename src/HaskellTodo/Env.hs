@@ -29,9 +29,11 @@ in the future, or depending on the nature of a project.
 -}
 module HaskellTodo.Env (
     Env (..)
+  , EnvRuntimeConstraints
   , buildEnv
   ) where
 
+import Control.Monad.IO.Class
 import Servant.Auth.Server
 import Network.Wai.Handler.Warp (Port)
 import Crypto.BCrypt
@@ -51,6 +53,8 @@ data Env = Env {
 , cookieSettings :: CookieSettings
 , bcrypt :: BCrypter
 }
+
+type EnvRuntimeConstraints m = MonadIO m
 
 instance HasField "transactor" Env SQLiteDb where
   getField = sqlite

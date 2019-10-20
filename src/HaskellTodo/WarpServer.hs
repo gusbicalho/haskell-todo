@@ -12,6 +12,7 @@ import Control.Carrier.Reader (runReader)
 import Control.Carrier.Lift (runM)
 import Control.Carrier.Error.Either (runError)
 import Control.Monad.Except
+import Common.Effect.JWT
 import Servant
 
 import HaskellTodo.Env ( Env (..) )
@@ -32,6 +33,7 @@ run env = do
                                                      Left err -> throwError err
                                                      Right v -> return v)
                                             . runM
+                                            . runJWTOps
                                             . runError @ServerError
                                             . runReader env
                                             ))
