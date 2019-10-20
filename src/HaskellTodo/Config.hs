@@ -1,3 +1,5 @@
+{-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 {-|
@@ -17,7 +19,7 @@ import Data.Aeson.TH
 import Data.Proxy
 import Network.Wai.Handler.Warp (Port)
 import Servant
-import Control.Monad.Reader
+import Control.Carrier.Reader
 import qualified Data.Text as T
 import Common.Util.AesonHelpers
 
@@ -46,10 +48,12 @@ type API = "dump" :> Get '[JSON] Config
 api :: Proxy API
 api = Proxy
 
-type ServerConstraints m c = (HasField "config" c Config, MonadReader c m)
+type ServerConstraints env sig m = ( Has (Reader env) sig m
+                                   , HasField "config" env Config
+                                   )
 
-server :: ServerConstraints m c => ServerT API m
-server = asks #config
+server :: forall env sig m . ServerConstraints env sig m => ServerT API m
+server = asks @env #config
 
 loadConfig :: IO Config
 loadConfig = CL.loadConfig

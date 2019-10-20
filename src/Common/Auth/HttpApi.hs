@@ -26,12 +26,13 @@ build such a context, given an environment that provides these settings via
 -}
 module Common.Auth.HttpApi where
 
-import Control.Monad.Except
-import Control.Monad.Reader
+import Control.Monad.IO.Class
+import Control.Effect.Reader
+import Control.Effect.Error
 import Data.Aeson
 import Data.ByteString.Lazy.Char8 as BS
 import qualified Data.Text as T
-import Servant
+import Servant hiding (throwError)
 import Servant.Auth as SA
 import Servant.Auth.Server as SAS
 import Common.HasField
@@ -80,16 +81,16 @@ type AuthenticationAPI input identity = (
 {-|
   Constraints required to build an authentication server with 'server'.
 -}
-type ServerConstraints m env = ( MonadError ServerError m
-                               , MonadIO m
-                               , MonadReader env m
-                               , HasField "jwtSettings" env JWTSettings
-                               )
+type ServerConstraints env sig m = ( Has (Error ServerError) sig m
+                                   , MonadIO m
+                                   , Has (Reader env) sig m
+                                   , HasField "jwtSettings" env JWTSettings
+                                   )
 
 {-|
   Builds an authentication server that conforms to 'AuthenticationAPI'.
 -}
-server :: (ServerConstraints m env, ToJSON identity)
+server :: forall env sig m input identity. (ServerConstraints env sig m, ToJSON identity)
           => (env -> input -> m (Maybe identity))
           -> ServerT (AuthenticationAPI input identity) m
 server authFn = login :<|> login
@@ -101,7 +102,7 @@ server authFn = login :<|> login
                     Nothing -> throwError err401
                     Just identity -> return identity
       let claims = AuthTokenClaims $ Known identity
-      jwtSettings <- asks #jwtSettings
+      jwtSettings <- asks @env #jwtSettings
       jwt <- liftIO $ makeJWT claims jwtSettings Nothing
       case jwt of
         Left _ -> throwError err500

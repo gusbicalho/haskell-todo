@@ -23,18 +23,19 @@ import Data.Proxy
 import Servant
 
 import qualified HaskellTodo.Config as Config
-import qualified HaskellTodo.Env as Env
+import           HaskellTodo.Env (Env)
 import qualified Common.Version.Server as Version
 import qualified HaskellTodo.HttpApi.Static as Static
 import qualified HaskellTodo.Auth.HttpApi as Auth
 import qualified HaskellTodo.HttpApi.User as User
 import qualified HaskellTodo.HttpApi.Item as Item
 
-type ServerConstraints m a =
-  ( Config.ServerConstraints m a
-  , Version.ServerConstraints m a
-  , User.ServerConstraints m
-  , Item.ServerConstraints m
+type ServerConstraints sig m =
+  ( Config.ServerConstraints Env sig m
+  , Version.ServerConstraints Env sig m
+  , Auth.AuthenticationServerConstraints sig m
+  , User.ServerConstraints sig m
+  , Item.ServerConstraints sig m
   )
 
 type API =
@@ -55,12 +56,12 @@ type API =
   :<|>
   Static.API
 
-server :: ServerConstraints m a => ServerT API m
+server :: ServerConstraints sig m => ServerT API m
 server =
   -- /ops
-  Config.server
+  Config.server @Env
   :<|> ( -- /api
-         Version.server
+         Version.server @Env
     :<|> Auth.authenticationServer
     :<|> \auth ->
            User.server auth
@@ -69,14 +70,15 @@ server =
   :<|> -- static files
   Static.server
 
+
 type APIContext = Auth.APIContext
 
 api :: Proxy API
 api = Proxy
 
-apiContext :: Env.Env -> Context APIContext
+apiContext :: Env -> Context APIContext
 apiContext = Auth.apiContext
 
-app :: forall m a . ServerConstraints m a => Env.Env -> (forall x. m x -> Handler x) -> Application
+app :: forall sig m . ServerConstraints sig m => Env -> (forall x. m x -> Handler x) -> Application
 app env provideDependencies =
   serveWithContext api (apiContext env) $ hoistServerWithContext api (Proxy @APIContext) provideDependencies server

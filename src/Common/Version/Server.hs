@@ -1,3 +1,5 @@
+{-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-|
 Description: Small utility server to expose the current version of a service
 
@@ -24,12 +26,13 @@ module Common.Version.Server
   ) where
 
 import GHC.Generics
-import Control.Monad.Reader
+-- import Control.Monad.Reader
 import Data.Proxy
 import Servant
 import Data.Aeson
 import Common.HasField
 import Common.Version.Types
+import Control.Carrier.Reader
 
 newtype WireVersion = WireVersion { version :: Version } deriving (Eq, Show, Generic)
 instance ToJSON WireVersion where
@@ -40,7 +43,9 @@ type API = Get '[JSON] WireVersion
 api :: Proxy API
 api = Proxy
 
-type ServerConstraints m a = (HasField "version" a Version, MonadReader a m)
+type ServerConstraints env sig m = ( Has (Reader env) sig m
+                                   , HasField "version" env Version
+                                   )
 
-server :: ServerConstraints m a => ServerT API m
-server = asks $ WireVersion . #version
+server :: forall env sig m . ServerConstraints env sig m => ServerT API m
+server = asks @env $ WireVersion . #version

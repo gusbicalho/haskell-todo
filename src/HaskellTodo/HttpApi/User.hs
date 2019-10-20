@@ -12,8 +12,8 @@ we do here is:
 3) Call controllers to actually get some data or effect some change.
 
 The 'server' must in a 'Monad' that satisfies all 'ServerConstraints'. One of
-these is @'MonadReader' 'Env.Env'@. In other words, this API is coupled to the
-concrete 'Env.Env' type we built for this application. For more discussion on
+these is @'MonadReader' 'Env'@. In other words, this API is coupled to the
+concrete 'Env' type we built for this application. For more discussion on
 this, check out the docs for "HaskellTodo.Env".
 -}
 module HaskellTodo.HttpApi.User
@@ -23,13 +23,14 @@ module HaskellTodo.HttpApi.User
   , ServerConstraints
   ) where
 
-import Control.Monad.Except
-import Control.Monad.Reader
-import Servant
+import Control.Effect.Error
+import Control.Effect.Reader
+import Control.Monad.IO.Class
+import Servant hiding (throwError)
 import Servant.Auth.Server
 import HaskellTodo.Auth.Types (IdentityTokenClaims)
 import qualified HaskellTodo.Auth.Logic as Auth.Logic
-import qualified HaskellTodo.Env as Env
+import HaskellTodo.Env (Env)
 import qualified HaskellTodo.WireTypes.User as Wire.User
 import qualified HaskellTodo.Controllers.User as C.User
 import qualified HaskellTodo.Adapters.User as A.User
@@ -45,12 +46,12 @@ type API = ReqBody '[JSON] Wire.User.NewUserInput :> Post '[JSON] Wire.User.Sing
 api :: Proxy API
 api = Proxy
 
-type ServerConstraints m = ( MonadError ServerError m
-                           , MonadIO m
-                           , MonadReader Env.Env m
-                           )
+type ServerConstraints sig m = ( Has (Error ServerError) sig m
+                               , MonadIO m
+                               , Has (Reader Env) sig m
+                               )
 
-server :: ServerConstraints m => AuthResult IdentityTokenClaims -> ServerT API m
+server :: ServerConstraints sig m => AuthResult IdentityTokenClaims -> ServerT API m
 server auth = createUser
          :<|> getUser
          :<|> userItems
@@ -58,7 +59,7 @@ server auth = createUser
     createUser newUserInput
       | Auth.Logic.authenticated auth = throwError err403
       | otherwise = do
-          env <- ask
+          env <- ask @Env
           maybeUser <- C.User.createUser (A.User.inputToNewUser newUserInput) env
           case maybeUser of
             Nothing -> throwError err500
@@ -67,7 +68,7 @@ server auth = createUser
     getUser idParam
       | not $ Auth.Logic.authenticatedAsUser idParam auth = throwError err403
       | otherwise = do
-          env <- ask
+          env <- ask @Env
           maybeUser <- C.User.getUser idParam env
           result maybeUser
         where
@@ -79,6 +80,6 @@ server auth = createUser
       | otherwise = getItems
         where
           getItems = do
-            env <- ask
+            env <- ask @Env
             items <- C.Item.findItemsByUserId userIdParam env
             return $ A.Item.manyWire items

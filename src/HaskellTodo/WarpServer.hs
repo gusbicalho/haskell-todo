@@ -7,13 +7,15 @@ module HaskellTodo.WarpServer (
 
 import Network.Wai.Handler.Warp hiding ( run )
 import Network.Wai.Logger
-import Control.Monad.Reader
+
+import Control.Carrier.Reader (runReader)
+import Control.Carrier.Lift (runM)
+import Control.Carrier.Error.Either (runError)
+import Control.Monad.Except
 import Servant
 
 import HaskellTodo.Env ( Env (..) )
 import qualified HaskellTodo.HttpApi as HttpApi
-
-type WarpAppM = ReaderT Env Handler
 
 withSettingsFromEnv :: Env -> (Settings -> IO a) -> IO a
 withSettingsFromEnv env actionFn = withStdoutLogger $ \aplogger ->
@@ -26,7 +28,10 @@ run env = do
     let port = #port env
     putStrLn $ "Server running at port " ++ show port
     withSettingsFromEnv env $ \settings ->
-      runSettings settings (HttpApi.app env provideDependencies)
-  where
-    provideDependencies :: WarpAppM x -> Handler x
-    provideDependencies m = runReaderT m env
+      runSettings settings (HttpApi.app env ( (>>= \case
+                                                     Left err -> throwError err
+                                                     Right v -> return v)
+                                            . runM
+                                            . runError @ServerError
+                                            . runReader env
+                                            ))
